@@ -40,3 +40,20 @@ export const addOrderItems = async (req, res, next) => {
     next(error);
   }
 };
+
+// @desc    Get logged in user's orders
+// @route   GET /api/v1/orders/myorders
+// @access  Private
+export const getMyOrders = async (req, res, next) => {
+  try {
+    const orders = await Order.find({ user: req.user._id }).sort('-createdAt');
+    
+    res.status(200).json({
+      success: true,
+      count: orders.length,
+      data: orders,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
