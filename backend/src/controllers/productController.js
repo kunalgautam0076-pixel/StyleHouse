@@ -1,8 +1,50 @@
+import mongoose from 'mongoose';
+import Category from '../models/Category.js';
 import Product from '../models/Product.js';
+
+// @desc    Create a draft product for an administrator to complete
+// @route   POST /api/v1/products
+// @access  Private/Admin
+export const createProduct = async (req, res, next) => {
+  try {
+    const category = await Category.findOne({ isActive: true }).sort('name');
+
+    if (!category) {
+      return res.status(400).json({
+        success: false,
+        message: 'Create an active category before adding products.',
+      });
+    }
+
+    const productId = new mongoose.Types.ObjectId();
+    const product = await Product.create({
+      _id: productId,
+      name: 'New Product',
+      slug: `new-product-${productId.toString()}`,
+      description: 'Add a product description.',
+      brand: 'StyleHouse',
+      category: category._id,
+      images: [{
+        url: 'https://placehold.co/600x800?text=New+Product',
+        publicId: 'draft-placeholder',
+        isPrimary: true,
+      }],
+      price: 0,
+      isPublished: false,
+    });
+
+    res.status(201).json({
+      success: true,
+      data: product,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
 
 // @desc    Get all published products (with filtering, sorting, pagination)
 // @route   GET /api/v1/products
-// @access  Public
+// @access  Public/Admin (admins can also see drafts)
 export const getProducts = async (req, res, next) => {
   try {
     let query;
@@ -14,12 +56,35 @@ export const getProducts = async (req, res, next) => {
     const removeFields = ['search', 'sort', 'page', 'limit'];
     removeFields.forEach(param => delete reqQuery[param]);
 
-    // Add 'isPublished: true' to only show active products
-    reqQuery.isPublished = true;
+    if (req.user?.role !== 'admin') {
+      reqQuery.isPublished = true;
+    }
 
-    // Handle Category Filtering (if a category slug or ID is passed)
+    let sortBy = req.query.sort;
+
+    // Category filters accept category slugs or IDs; new arrivals means newest first.
     if (reqQuery.category) {
-       // We will handle exact match here. In a real app, you might look up the category ID by slug first.
+      if (reqQuery.category === 'new-arrivals') {
+        delete reqQuery.category;
+        sortBy = sortBy || '-createdAt';
+      } else {
+        const categoryId = mongoose.isValidObjectId(reqQuery.category)
+          ? reqQuery.category
+          : (await Category.findOne({ slug: reqQuery.category, isActive: true }).select('_id'))?._id;
+
+        if (!categoryId) {
+          const page = parseInt(req.query.page, 10) || 1;
+          const limit = parseInt(req.query.limit, 10) || 12;
+
+          return res.status(200).json({
+            success: true,
+            pagination: { page, limit, total: 0, totalPages: 0 },
+            data: [],
+          });
+        }
+
+        reqQuery.category = categoryId;
+      }
     }
 
     // Handle Search Keyword
@@ -38,9 +103,8 @@ export const getProducts = async (req, res, next) => {
     query = Product.find(JSON.parse(queryStr)).populate('category', 'name slug');
 
     // Sorting
-    if (req.query.sort) {
-      const sortBy = req.query.sort.split(',').join(' ');
-      query = query.sort(sortBy);
+    if (sortBy) {
+      query = query.sort(sortBy.split(',').join(' '));
     } else {
       query = query.sort('-createdAt'); // Default sort by newest
     }
@@ -76,9 +140,11 @@ export const getProducts = async (req, res, next) => {
 // @access  Public
 export const getProductBySlug = async (req, res, next) => {
   try {
+    const productFilter = mongoose.isValidObjectId(req.params.slug)
+      ? { _id: req.params.slug, isPublished: true }
+      : { slug: req.params.slug, isPublished: true };
     const product = await Product.findOne({ 
-      slug: req.params.slug, 
-      isPublished: true 
+      ...productFilter,
     }).populate('category', 'name slug');
 
     if (!product) {
@@ -108,7 +174,11 @@ export const updateProduct = async (req, res, next) => {
 
     // Update fields from request body
     product.name = req.body.name || product.name;
-    product.slug = req.body.name ? req.body.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') : product.slug;
+    if (req.body.name) {
+      const slugBase = req.body.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') || 'product';
+      const slugExists = await Product.exists({ slug: slugBase, _id: { $ne: product._id } });
+      product.slug = slugExists ? `${slugBase}-${product._id}` : slugBase;
+    }
     product.price = req.body.price !== undefined ? req.body.price : product.price;
     product.compareAtPrice = req.body.compareAtPrice !== undefined ? req.body.compareAtPrice : product.compareAtPrice;
     product.description = req.body.description || product.description;
@@ -118,7 +188,10 @@ export const updateProduct = async (req, res, next) => {
     product.isPublished = req.body.isPublished !== undefined ? req.body.isPublished : product.isPublished;
     
     if (req.body.images) {
-      product.images = req.body.images;
+      product.images = req.body.images.map((image, index) => ({
+        ...image,
+        publicId: image.publicId || product.images[index]?.publicId || `admin-${product._id}-${index}`,
+      }));
     }
 
     const updatedProduct = await product.save();

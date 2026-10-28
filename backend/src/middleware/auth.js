@@ -40,6 +40,17 @@ export const protect = async (req, res, next) => {
   }
 };
 
+export const optionalProtect = (req, res, next) => {
+  const hasCookieToken = req.cookies?.token && req.cookies.token !== 'none';
+  const hasBearerToken = req.headers.authorization?.startsWith('Bearer ');
+
+  if (!hasCookieToken && !hasBearerToken) {
+    return next();
+  }
+
+  return protect(req, res, next);
+};
+
 // Grant access to specific roles
 export const authorize = (...roles) => {
   return (req, res, next) => {

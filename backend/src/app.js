@@ -21,6 +21,7 @@ app.use(cors({
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   limit: 100,
+  skip: (req) => req.path === '/v1/auth/login',
   message: 'Too many requests from this IP, please try again later.'
 });
 app.use('/api', limiter);

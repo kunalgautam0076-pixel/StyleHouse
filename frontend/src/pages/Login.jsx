@@ -1,4 +1,4 @@
-import React, { useContext, useState } from 'react';
+import React, { useState, useContext, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { Link, useNavigate } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
@@ -6,7 +6,7 @@ import './Login.css'; // Dedicated CSS
 
 const Login = () => {
   const { register, handleSubmit, formState: { errors } } = useForm();
-  const { login } = useContext(AuthContext);
+  const { login, user } = useContext(AuthContext);
   const navigate = useNavigate();
   const [serverError, setServerError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -15,14 +15,21 @@ const Login = () => {
     try {
       setIsLoading(true);
       setServerError('');
-      await login(data.email, data.password);
-      navigate('/account');
+      const result = await login(data.email, data.password);
+      navigate(result.user.role === 'admin' ? '/admin' : '/account');
     } catch (error) {
       setServerError(error.response?.data?.message || 'Login failed.');
     } finally {
       setIsLoading(false);
     }
   };
+
+  useEffect(() => {
+    if (user) {
+      // Send admins to /admin, and regular users to /account
+      navigate(user.role === 'admin' ? '/admin' : '/account');
+    }
+  }, [user, navigate]);
 
   return (
     <div className="login-container">

@@ -79,6 +79,13 @@ export const login = async (req, res, next) => {
 // @access  Private
 export const getMe = async (req, res, next) => {
   try {
+    if (!req.user) {
+      return res.status(200).json({
+        success: true,
+        data: null,
+      });
+    }
+
     const user = await User.findById(req.user.id);
     if (!user) {
         const error = new Error('User not found');
