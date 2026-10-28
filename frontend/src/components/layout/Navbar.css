@@ -31,7 +31,7 @@
   flex-shrink: 0;
 }
 .nav-logo {
-  height: 48px;
+  height: 52px;
   width: auto;
   object-fit: contain;
   display: block;
@@ -362,7 +362,7 @@
 
 /* ── Small Mobile (≤480px) ── */
 @media (max-width: 480px) {
-  .nav-logo         { height: 38px; }
+  .nav-logo         { height: 44px; }
   .nav-container    { height: 56px; }
   .icon-btn         { width: 36px; height: 36px; }
   .user-avatar-circle { width: 28px; height: 28px; font-size: 0.78rem; }

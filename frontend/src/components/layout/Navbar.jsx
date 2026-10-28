@@ -5,7 +5,7 @@ import { Search, ShoppingBag, Heart, User, Menu, X, ChevronDown } from 'lucide-r
 import { AuthContext } from '../../context/AuthContext';
 import { CartContext } from '../../context/CartContext';
 import { WishlistContext } from '../../context/WishlistContext';
-import logo from '../../assets/logo.png';
+import logo from '../../assets/logo-transparent.png';
 import './Navbar.css';
 
 const NAV_LINKS = [
