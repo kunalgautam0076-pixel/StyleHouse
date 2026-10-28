@@ -8,11 +8,11 @@ import { formatCurrency } from '../utils/currency';
 import './Account.css';
 
 const STATUS_CLASSES = {
-  Pending:    'status-pending',
-  Processing: 'status-processing',
-  Shipped:    'status-shipped',
-  Delivered:  'status-delivered',
-  Cancelled:  'status-cancelled',
+  'Payment Pending': 'status-pending',
+  Processing:        'status-processing',
+  Shipped:           'status-shipped',
+  Delivered:         'status-delivered',
+  Cancelled:         'status-cancelled',
 };
 
 const Account = () => {

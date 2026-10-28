@@ -292,3 +292,67 @@ export const getMyOrders = async (req, res, next) => {
     next(error);
   }
 };
+
+// @desc    Get all orders for store administration
+// @route   GET /api/v1/orders/admin
+// @access  Private/Admin
+export const getAdminOrders = async (req, res, next) => {
+  try {
+    const orders = await Order.find()
+      .populate('user', 'name email')
+      .sort('-createdAt');
+
+    res.status(200).json({
+      success: true,
+      count: orders.length,
+      data: orders,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    Update fulfillment status for an order
+// @route   PATCH /api/v1/orders/:id/status
+// @access  Private/Admin
+export const updateOrderStatus = async (req, res, next) => {
+  try {
+    const allowedStatuses = ['Processing', 'Shipped', 'Delivered', 'Cancelled'];
+    const { orderStatus } = req.body;
+
+    if (!mongoose.isValidObjectId(req.params.id) || !allowedStatuses.includes(orderStatus)) {
+      throw createRequestError('Select a valid fulfillment status.');
+    }
+
+    const order = await Order.findById(req.params.id);
+    if (!order) {
+      throw createRequestError('Order not found.', 404);
+    }
+
+    if (order.orderStatus === 'Cancelled' && orderStatus !== 'Cancelled') {
+      throw createRequestError('Cancelled orders cannot be reopened.', 409);
+    }
+    if (orderStatus !== 'Cancelled' && !order.isPaid && order.paymentMethod !== 'COD') {
+      throw createRequestError('This order cannot be fulfilled until payment is complete.', 409);
+    }
+    if (orderStatus === 'Cancelled' && order.paymentMethod === 'Razorpay') {
+      throw createRequestError(
+        order.isPaid
+          ? 'Refund the captured Razorpay payment before cancelling this order.'
+          : 'Resolve the pending Razorpay payment before cancelling this order.',
+        409,
+      );
+    }
+
+    order.orderStatus = orderStatus;
+    order.isDelivered = orderStatus === 'Delivered';
+    order.deliveredAt = order.isDelivered ? (order.deliveredAt || new Date()) : undefined;
+
+    const updatedOrder = await order.save();
+    await updatedOrder.populate('user', 'name email');
+
+    res.status(200).json({ success: true, data: updatedOrder });
+  } catch (error) {
+    next(error);
+  }
+};

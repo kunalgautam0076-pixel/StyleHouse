@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useContext } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { BadgeCheck, Boxes, FileEdit, Package, Search, TriangleAlert } from 'lucide-react';
+import { BadgeCheck, Boxes, FileEdit, Package, Search, ShoppingBag, TriangleAlert } from 'lucide-react';
 import { AuthContext } from '../../context/AuthContext';
 import api from '../../services/api';
 import { formatCurrency } from '../../utils/currency';
@@ -12,6 +12,10 @@ const AdminDashboard = () => {
   const { hash } = useLocation();
 
   const [products, setProducts] = useState([]);
+  const [orders, setOrders] = useState([]);
+  const [orderStatuses, setOrderStatuses] = useState({});
+  const [updatingOrderId, setUpdatingOrderId] = useState('');
+  const [orderError, setOrderError] = useState('');
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -34,14 +38,16 @@ const AdminDashboard = () => {
 
   async function fetchAdminData() {
     try {
-      const [productsResponse, categoriesResponse] = await Promise.all([
+      const [productsResponse, categoriesResponse, ordersResponse] = await Promise.all([
         api.get('/products'),
         api.get('/categories'),
+        api.get('/orders/admin'),
       ]);
       setProducts(productsResponse.data.data);
       setCategories(categoriesResponse.data.data);
+      setOrders(ordersResponse.data.data);
     } catch {
-      setError('Failed to load inventory data.');
+      setError('Failed to load dashboard data.');
     } finally {
       setLoading(false);
     }
@@ -119,6 +125,29 @@ const AdminDashboard = () => {
       setProducts(currentProducts => currentProducts.filter(product => product._id !== id));
     } catch (err) {
       alert(err.response?.data?.message || 'Failed to delete product');
+    }
+  };
+
+  const handleOrderStatusChange = async (orderId) => {
+    const orderStatus = orderStatuses[orderId];
+    if (!orderStatus) return;
+
+    try {
+      setUpdatingOrderId(orderId);
+      setOrderError('');
+      const { data } = await api.patch(`/orders/${orderId}/status`, { orderStatus });
+      setOrders(currentOrders => currentOrders.map(order => (
+        order._id === orderId ? data.data : order
+      )));
+      setOrderStatuses(currentStatuses => {
+        const nextStatuses = { ...currentStatuses };
+        delete nextStatuses[orderId];
+        return nextStatuses;
+      });
+    } catch (err) {
+      setOrderError(err.response?.data?.message || 'Failed to update order status.');
+    } finally {
+      setUpdatingOrderId('');
     }
   };
 
@@ -294,6 +323,112 @@ const AdminDashboard = () => {
           )}
         </section>
       )}
+
+      <section className="admin-section" aria-labelledby="orders-heading">
+        <div className="inventory-heading">
+          <div>
+            <span className="admin-eyebrow">FULFILLMENT</span>
+            <h2 id="orders-heading">
+              <ShoppingBag size={21} aria-hidden="true" />
+              Customer orders <span className="inventory-count">{orders.length}</span>
+            </h2>
+          </div>
+        </div>
+
+        {orderError && <div className="admin-error" role="alert">{orderError}</div>}
+        {loading ? (
+          <p className="admin-status">Loading orders...</p>
+        ) : orders.length === 0 ? (
+          <p className="admin-status">No customer orders yet.</p>
+        ) : (
+          <div className="admin-table-wrapper">
+            <table className="admin-table orders-admin-table">
+              <thead>
+                <tr>
+                  <th>Order</th>
+                  <th>Customer</th>
+                  <th>Ship to</th>
+                  <th>Items</th>
+                  <th>Total / Payment</th>
+                  <th>Status</th>
+                  <th>Update</th>
+                </tr>
+              </thead>
+              <tbody>
+                {orders.map(order => {
+                  const selectedStatus = orderStatuses[order._id] || order.orderStatus;
+                  return (
+                    <tr key={order._id}>
+                      <td>
+                        <strong>#{order._id.slice(-6).toUpperCase()}</strong>
+                        <span className="admin-order-date">
+                          {new Date(order.createdAt).toLocaleDateString('en-IN')}
+                        </span>
+                      </td>
+                      <td>
+                        <strong>{order.user?.name || 'Customer'}</strong>
+                        <span className="admin-order-date">{order.user?.email || 'Account unavailable'}</span>
+                      </td>
+                      <td>
+                        <strong>{order.shippingAddress.fullName}</strong>
+                        <span className="admin-order-date">
+                          {order.shippingAddress.city}, {order.shippingAddress.postalCode}
+                        </span>
+                        <span className="admin-order-date">{order.shippingAddress.phone}</span>
+                      </td>
+                      <td>
+                        {order.orderItems.map((item, index) => (
+                          <span className="admin-order-item" key={`${item.product}-${index}`}>
+                            {item.qty}× {item.name} ({item.size})
+                          </span>
+                        ))}
+                      </td>
+                      <td>
+                        <strong>{formatCurrency(order.totalPrice)}</strong>
+                        <span className="admin-order-date">
+                          {order.paymentMethod} · {order.isPaid ? 'Paid' : 'Unpaid'}
+                        </span>
+                      </td>
+                      <td>
+                        <select
+                          className="admin-order-status-select"
+                          aria-label={`Status for order ${order._id.slice(-6)}`}
+                          value={selectedStatus}
+                          onChange={event => setOrderStatuses(current => ({
+                            ...current,
+                            [order._id]: event.target.value,
+                          }))}
+                          disabled={order.orderStatus === 'Cancelled'}
+                        >
+                          {order.orderStatus === 'Payment Pending' && (
+                            <option value="Payment Pending">Payment Pending</option>
+                          )}
+                          {['Processing', 'Shipped', 'Delivered'].map(status => (
+                            <option key={status} value={status}>{status}</option>
+                          ))}
+                          {order.paymentMethod === 'COD' && (
+                            <option value="Cancelled">Cancelled</option>
+                          )}
+                        </select>
+                      </td>
+                      <td>
+                        <button
+                          type="button"
+                          className="btn-edit"
+                          disabled={selectedStatus === order.orderStatus || updatingOrderId === order._id}
+                          onClick={() => handleOrderStatusChange(order._id)}
+                        >
+                          {updatingOrderId === order._id ? 'Saving...' : 'Save'}
+                        </button>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </section>
 
       <div className="admin-section" id="inventory">
         <div className="inventory-heading">

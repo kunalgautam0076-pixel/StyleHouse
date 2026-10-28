@@ -252,6 +252,7 @@
   border-collapse: collapse;
   text-align: left;
 }
+.orders-admin-table { min-width: 1120px; }
 .admin-table th,
 .admin-table td {
   padding: 0.9rem 1.1rem;
@@ -268,6 +269,32 @@
 }
 .admin-table tr:last-child td { border-bottom: none; }
 .admin-table tbody tr:hover { background: var(--bg-secondary); }
+.admin-order-date,
+.admin-order-item {
+  display: block;
+  margin-top: 0.25rem;
+  color: var(--text-secondary);
+  font-size: 0.76rem;
+  line-height: 1.45;
+}
+.admin-order-status-select {
+  min-width: 132px;
+  padding: 0.5rem 0.65rem;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  color: var(--text-primary);
+  background: var(--bg-card);
+  font: inherit;
+  font-size: 0.8rem;
+}
+.admin-order-status-select:focus {
+  outline: 2px solid var(--accent-color);
+  outline-offset: 2px;
+}
+.admin-table button:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
 
 .product-cell {
   display: flex;
