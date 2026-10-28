@@ -5,7 +5,9 @@ import cookieParser from 'cookie-parser';
 import rateLimit from 'express-rate-limit';
 
 // Route imports
-import authRoutes from './routes/authRoutes.js'; // <-- ADD THIS
+import authRoutes from './routes/authRoutes.js';
+import productRoutes from './routes/productRoutes.js';
+import categoryRoutes from './routes/categoryRoutes.js';
 
 const app = express();
 
@@ -28,11 +30,13 @@ app.use(cookieParser());
 
 // Health Check
 app.get('/api/v1/health', (req, res) => {
-  res.status(200).json({ success: true, message: 'LUXE API is running' });
+  res.status(200).json({ success: true, message: 'StyleHouse API is running' });
 });
 
 // Mount Routes
-app.use('/api/v1/auth', authRoutes); // <-- ADD THIS
+app.use('/api/v1/auth', authRoutes);
+app.use('/api/v1/products', productRoutes);
+app.use('/api/v1/categories', categoryRoutes);
 
 // Centralized Error Handler
 app.use((err, req, res, next) => {
