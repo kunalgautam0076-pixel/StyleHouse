@@ -12,6 +12,7 @@ import Register from './pages/Register';
 import Account from './pages/Account';
 import NotFound from './pages/NotFound';
 import Cart from './pages/Cart';
+import Checkout from './pages/Checkout';
 
 function App() {
   return (
@@ -29,6 +30,7 @@ function App() {
             <Route path="/register" element={<Register />} />
             <Route path="/account" element={<Account />} />
             <Route path="/cart" element={<Cart />} />
+            <Route path="/checkout" element={<Checkout />} />
             
             {/* 404 Catch-all */}
             <Route path="*" element={<NotFound />} />
