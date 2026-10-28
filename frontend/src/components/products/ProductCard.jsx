@@ -1,18 +1,32 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import { Link } from 'react-router-dom';
+import { Heart } from 'lucide-react';
+import { WishlistContext } from '../../context/WishlistContext';
 import './ProductCard.css';
 
 const ProductCard = ({ product }) => {
-  // Get the primary image or fallback to a placeholder
+  const { toggleWishlist, isInWishlist } = useContext(WishlistContext);
+  const isFavorited = isInWishlist(product._id);
+
   const primaryImage = product.images?.find(img => img.isPrimary)?.url || product.images?.[0]?.url || 'https://via.placeholder.com/400x500?text=No+Image';
 
   return (
     <div className="product-card">
-      <Link to={`/product/${product.slug}`} className="product-image-container">
-        <img src={primaryImage} alt={product.name} className="product-image" loading="lazy" />
+      <div className="product-image-container">
+        <Link to={`/product/${product.slug}`} className="product-image-link">
+          <img src={primaryImage} alt={product.name} className="product-image" loading="lazy" />
+        </Link>
+        
+        <button 
+          className={`wishlist-toggle-btn ${isFavorited ? 'active' : ''}`}
+          onClick={() => toggleWishlist(product)}
+          aria-label="Wishlist toggle"
+        >
+          <Heart size={18} strokeWidth={1.5} fill={isFavorited ? 'currentColor' : 'none'} />
+        </button>
+
         {product.stockQuantity === 0 && <span className="product-badge sold-out">Sold Out</span>}
-        {product.compareAtPrice > product.price && <span className="product-badge sale">Sale</span>}
-      </Link>
+      </div>
       
       <div className="product-info">
         <Link to={`/product/${product.slug}`}>
@@ -20,9 +34,6 @@ const ProductCard = ({ product }) => {
         </Link>
         <div className="product-price-container">
           <span className="product-price">${product.price.toFixed(2)}</span>
-          {product.compareAtPrice > product.price && (
-            <span className="product-compare-price">${product.compareAtPrice.toFixed(2)}</span>
-          )}
         </div>
       </div>
     </div>

@@ -13,6 +13,9 @@ import Account from './pages/Account';
 import NotFound from './pages/NotFound';
 import Cart from './pages/Cart';
 import Checkout from './pages/Checkout';
+import AdminDashboard from './pages/admin/AdminDashboard';
+import EditProduct from './pages/admin/EditProduct';
+import Wishlist from './pages/Wishlist';
 
 function App() {
   return (
@@ -31,6 +34,9 @@ function App() {
             <Route path="/account" element={<Account />} />
             <Route path="/cart" element={<Cart />} />
             <Route path="/checkout" element={<Checkout />} />
+            <Route path="/admin" element={<AdminDashboard />} />
+            <Route path="/admin/product/:id/edit" element={<EditProduct />} />
+            <Route path="/wishlist" element={<Wishlist />} />
             
             {/* 404 Catch-all */}
             <Route path="*" element={<NotFound />} />

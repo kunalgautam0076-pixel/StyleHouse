@@ -95,3 +95,39 @@ export const getProductBySlug = async (req, res, next) => {
     next(error);
   }
 };  
+// @desc    Update a product (Admin only)
+// @route   PUT /api/v1/products/:id
+// @access  Private/Admin
+export const updateProduct = async (req, res, next) => {
+  try {
+    let product = await Product.findById(req.params.id);
+
+    if (!product) {
+      return res.status(404).json({ success: false, message: 'Product not found' });
+    }
+
+    // Update fields from request body
+    product.name = req.body.name || product.name;
+    product.slug = req.body.name ? req.body.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') : product.slug;
+    product.price = req.body.price !== undefined ? req.body.price : product.price;
+    product.compareAtPrice = req.body.compareAtPrice !== undefined ? req.body.compareAtPrice : product.compareAtPrice;
+    product.description = req.body.description || product.description;
+    product.category = req.body.category || product.category;
+    product.brand = req.body.brand || product.brand;
+    product.stockQuantity = req.body.stockQuantity !== undefined ? req.body.stockQuantity : product.stockQuantity;
+    product.isPublished = req.body.isPublished !== undefined ? req.body.isPublished : product.isPublished;
+    
+    if (req.body.images) {
+      product.images = req.body.images;
+    }
+
+    const updatedProduct = await product.save();
+
+    res.status(200).json({
+      success: true,
+      data: updatedProduct,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
