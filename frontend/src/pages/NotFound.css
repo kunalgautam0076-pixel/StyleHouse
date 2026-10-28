@@ -1,26 +1,72 @@
-.notfound-container {
+/* ─────────────────────────────────────────────
+   404 NOT FOUND PAGE
+───────────────────────────────────────────── */
+.notfound-page {
+  min-height: calc(100vh - 68px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem 1rem;
+  background: var(--bg-secondary);
+  position: relative;
+  overflow: hidden;
+}
+
+/* Decorative background elements */
+.notfound-page::before {
+  content: '404';
+  position: absolute;
+  font-family: var(--font-heading);
+  font-size: clamp(18rem, 35vw, 28rem);
+  font-weight: 700;
+  color: rgba(140, 122, 107, 0.05);
+  pointer-events: none;
+  user-select: none;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  white-space: nowrap;
+  z-index: 0;
+}
+
+.notfound-content {
+  position: relative;
+  z-index: 1;
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
-  min-height: 60vh;
   text-align: center;
-  padding: 2rem;
+  gap: 1.25rem;
+  max-width: 500px;
 }
 
-.notfound-container h1 {
-  font-size: 6rem;
+.notfound-number {
+  font-family: var(--font-heading);
+  font-size: clamp(6rem, 15vw, 10rem);
   font-weight: 700;
-  color: var(--accent-color);
-  margin-bottom: 0;
+  line-height: 1;
+  background: linear-gradient(135deg, var(--accent-color) 0%, var(--accent-gold) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 
-.notfound-container h2 {
-  font-size: 2rem;
-  margin-bottom: 1rem;
+.notfound-content h1 {
+  font-size: clamp(1.5rem, 3vw, 2rem);
+  color: var(--text-primary);
 }
 
-.notfound-container p {
+.notfound-content p {
   color: var(--text-secondary);
-  margin-bottom: 2rem;
+  font-size: 1rem;
+  max-width: 360px;
+  line-height: 1.7;
+}
+
+.notfound-actions {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+  justify-content: center;
+  margin-top: 0.5rem;
 }
