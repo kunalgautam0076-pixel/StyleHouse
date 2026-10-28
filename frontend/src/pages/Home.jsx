@@ -73,6 +73,7 @@ const CATEGORIES = [
 
 const Home = () => {
   const [featured, setFeatured] = useState([]);
+  const [accessories, setAccessories] = useState([]);
   const [loadingFeatured, setLoadingFeatured] = useState(true);
 
   useEffect(() => {
@@ -80,6 +81,10 @@ const Home = () => {
       .then(({ data }) => setFeatured(data.data?.slice(0, 4) || []))
       .catch(() => {})
       .finally(() => setLoadingFeatured(false));
+
+    api.get('/products?category=accessories&limit=5')
+      .then(({ data }) => setAccessories(data.data?.slice(0, 5) || []))
+      .catch(() => setAccessories([]));
   }, []);
 
   return (
@@ -231,6 +236,34 @@ const Home = () => {
           </div>
         </Reveal>
       </section>
+
+      {accessories.length > 0 && (
+        <section className="container featured-section">
+          <Reveal>
+            <div className="section-header-block">
+              <span className="section-eyebrow">Finishing touches</span>
+              <h2 className="section-heading">Accessories</h2>
+              <div className="divider" />
+            </div>
+          </Reveal>
+
+          <div className="featured-grid">
+            {accessories.map((product, i) => (
+              <Reveal key={product._id} delay={i * 0.1}>
+                <ProductCard product={product} />
+              </Reveal>
+            ))}
+          </div>
+
+          <Reveal>
+            <div className="featured-cta-center">
+              <Link to="/shop?category=accessories" className="btn-secondary">
+                View All Accessories <ArrowRight size={16} />
+              </Link>
+            </div>
+          </Reveal>
+        </section>
+      )}
 
       {/* ── Brand Story ── */}
       <section className="brand-story">

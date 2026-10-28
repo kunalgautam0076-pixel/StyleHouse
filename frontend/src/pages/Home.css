@@ -190,9 +190,18 @@
 }
 
 /* Category card color placeholders (when no image) */
-.cat-women       { background-color: #D4C8BB; }
-.cat-men         { background-color: #C4C8CA; }
-.cat-accessories { background-color: #CFC8BA; }
+.cat-women {
+  background-color: #D4C8BB;
+  background-image: url('https://images.unsplash.com/photo-1595777457583-95e059d581b8?auto=format&fit=crop&w=1200&q=85');
+}
+.cat-men {
+  background-color: #C4C8CA;
+  background-image: url('https://images.unsplash.com/photo-1598033129183-c4f50c736f10?auto=format&fit=crop&w=1200&q=85');
+}
+.cat-accessories {
+  background-color: #CFC8BA;
+  background-image: url('https://images.unsplash.com/photo-1548036328-c9fa89d128fa?auto=format&fit=crop&w=1200&q=85');
+}
 
 .category-card:hover { transform: translateY(-6px); box-shadow: var(--shadow-lg); }
 

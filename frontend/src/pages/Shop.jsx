@@ -37,10 +37,9 @@ const Shop = () => {
     const fetchProducts = async () => {
       try {
         setLoading(true);
-        let query = '/products';
-        const params = [];
+        const params = ['limit=100'];
         if (categoryFilter !== 'all') params.push(`category=${categoryFilter}`);
-        if (params.length) query += '?' + params.join('&');
+        const query = `/products?${params.join('&')}`;
         const { data } = await api.get(query);
         setProducts(data.data || []);
       } catch {

@@ -1,5 +1,5 @@
-import React, { useContext } from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate, Outlet } from 'react-router-dom';
+import React, { useContext, useLayoutEffect } from 'react';
+import { BrowserRouter as Router, Routes, Route, Navigate, Outlet, useLocation } from 'react-router-dom';
 import Navbar from './components/layout/Navbar';
 import Footer from './components/layout/Footer';
 import { AuthContext } from './context/AuthContext';
@@ -26,9 +26,20 @@ const AdminRoute = () => {
   return <Outlet />;
 };
 
+const ScrollToTop = () => {
+  const { pathname, hash } = useLocation();
+
+  useLayoutEffect(() => {
+    if (!hash) window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+  }, [pathname, hash]);
+
+  return null;
+};
+
 function App() {
   return (
     <Router>
+      <ScrollToTop />
       {/* app-wrapper and main-content are styled in global.css to keep the footer at the bottom */}
       <div className="app-wrapper">
         <Navbar />
