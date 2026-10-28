@@ -9,8 +9,38 @@ const AdminDashboard = () => {
   const navigate = useNavigate();
 
   const [products, setProducts] = useState([]);
+  const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [showAddProduct, setShowAddProduct] = useState(false);
+  const [isSavingProduct, setIsSavingProduct] = useState(false);
+  const [formError, setFormError] = useState('');
+  const [newProduct, setNewProduct] = useState({
+    name: '',
+    description: '',
+    price: '',
+    compareAtPrice: '',
+    category: '',
+    brand: 'StyleHouse',
+    stockQuantity: '0',
+    imageUrl: '',
+    isPublished: false,
+  });
+
+  async function fetchAdminData() {
+    try {
+      const [productsResponse, categoriesResponse] = await Promise.all([
+        api.get('/products'),
+        api.get('/categories'),
+      ]);
+      setProducts(productsResponse.data.data);
+      setCategories(categoriesResponse.data.data);
+    } catch {
+      setError('Failed to load inventory data.');
+    } finally {
+      setLoading(false);
+    }
+  }
   
   // NEW: Add a small delay to wait for AuthContext to fetch the user
   const [isCheckingAuth, setIsCheckingAuth] = useState(true);
@@ -41,25 +71,39 @@ const AdminDashboard = () => {
     fetchAdminData();
   }, [user, isCheckingAuth, navigate]);
 
-  const fetchAdminData = async () => {
+  const handleCreateProduct = async (event) => {
+    event.preventDefault();
     try {
-      setLoading(true);
-      const { data } = await api.get('/products');
-      setProducts(data.data);
+      setIsSavingProduct(true);
+      setFormError('');
+      const { data } = await api.post('/products', {
+        name: newProduct.name,
+        description: newProduct.description,
+        price: Number(newProduct.price),
+        compareAtPrice: newProduct.compareAtPrice ? Number(newProduct.compareAtPrice) : undefined,
+        category: newProduct.category,
+        brand: newProduct.brand,
+        stockQuantity: Number(newProduct.stockQuantity),
+        images: [{ url: newProduct.imageUrl, isPrimary: true }],
+        isPublished: newProduct.isPublished,
+      });
+      setProducts(currentProducts => [data.data, ...currentProducts]);
+      setNewProduct({
+        name: '',
+        description: '',
+        price: '',
+        compareAtPrice: '',
+        category: '',
+        brand: 'StyleHouse',
+        stockQuantity: '0',
+        imageUrl: '',
+        isPublished: false,
+      });
+      setShowAddProduct(false);
     } catch (err) {
-      setError('Failed to load inventory data.');
+      setFormError(err.response?.data?.message || 'Failed to create product.');
     } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleCreateProduct = async () => {
-    try {
-      const { data } = await api.post('/products');
-      setProducts([data.data, ...products]);
-      alert('Blank sample product created! You can now edit its details.');
-    } catch (err) {
-      alert(err.response?.data?.message || 'Failed to create product');
+      setIsSavingProduct(false);
     }
   };
 
@@ -91,12 +135,130 @@ const AdminDashboard = () => {
           <h1>Admin Dashboard</h1>
           <p>Manage your store inventory and catalog</p>
         </div>
-        <button onClick={handleCreateProduct} className="btn-primary">
-          + Add New Product
+        <button
+          onClick={() => {
+            setShowAddProduct(open => !open);
+            setFormError('');
+          }}
+          className="btn-primary"
+        >
+          {showAddProduct ? 'Cancel' : '+ Add New Product'}
         </button>
       </div>
 
       {error && <div className="admin-error">{error}</div>}
+
+      {showAddProduct && (
+        <section className="admin-section add-product-section">
+          <h2>Add Product</h2>
+          {formError && <div className="admin-error">{formError}</div>}
+          {categories.length === 0 ? (
+            <p className="admin-status">Create an active category before adding products.</p>
+          ) : (
+            <form className="add-product-form" onSubmit={handleCreateProduct}>
+              <div className="add-product-grid">
+                <label>
+                  Product name
+                  <input
+                    name="name"
+                    value={newProduct.name}
+                    onChange={event => setNewProduct({ ...newProduct, name: event.target.value })}
+                    required
+                  />
+                </label>
+                <label>
+                  Brand
+                  <input
+                    name="brand"
+                    value={newProduct.brand}
+                    onChange={event => setNewProduct({ ...newProduct, brand: event.target.value })}
+                  />
+                </label>
+                <label>
+                  Price ($)
+                  <input
+                    name="price"
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    value={newProduct.price}
+                    onChange={event => setNewProduct({ ...newProduct, price: event.target.value })}
+                    required
+                  />
+                </label>
+                <label>
+                  Compare-at price ($)
+                  <input
+                    name="compareAtPrice"
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    value={newProduct.compareAtPrice}
+                    onChange={event => setNewProduct({ ...newProduct, compareAtPrice: event.target.value })}
+                  />
+                </label>
+                <label>
+                  Category
+                  <select
+                    name="category"
+                    value={newProduct.category}
+                    onChange={event => setNewProduct({ ...newProduct, category: event.target.value })}
+                    required
+                  >
+                    <option value="">Select category</option>
+                    {categories.map(category => (
+                      <option key={category._id} value={category._id}>{category.name}</option>
+                    ))}
+                  </select>
+                </label>
+                <label>
+                  Stock quantity
+                  <input
+                    name="stockQuantity"
+                    type="number"
+                    min="0"
+                    step="1"
+                    value={newProduct.stockQuantity}
+                    onChange={event => setNewProduct({ ...newProduct, stockQuantity: event.target.value })}
+                    required
+                  />
+                </label>
+                <label className="add-product-wide">
+                  Image URL
+                  <input
+                    name="imageUrl"
+                    type="url"
+                    value={newProduct.imageUrl}
+                    onChange={event => setNewProduct({ ...newProduct, imageUrl: event.target.value })}
+                    required
+                  />
+                </label>
+                <label className="add-product-wide">
+                  Description
+                  <textarea
+                    name="description"
+                    rows="4"
+                    value={newProduct.description}
+                    onChange={event => setNewProduct({ ...newProduct, description: event.target.value })}
+                    required
+                  />
+                </label>
+                <label className="add-product-publish">
+                  <input
+                    type="checkbox"
+                    checked={newProduct.isPublished}
+                    onChange={event => setNewProduct({ ...newProduct, isPublished: event.target.checked })}
+                  />
+                  Publish product immediately
+                </label>
+              </div>
+              <button type="submit" className="btn-primary" disabled={isSavingProduct}>
+                {isSavingProduct ? 'Adding Product...' : 'Add Product'}
+              </button>
+            </form>
+          )}
+        </section>
+      )}
 
       <div className="admin-section">
         <h2>Product Inventory ({products.length})</h2>

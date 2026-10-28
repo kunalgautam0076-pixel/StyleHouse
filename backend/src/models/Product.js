@@ -63,6 +63,11 @@ const productSchema = new mongoose.Schema(
       required: [true, 'Product base price is required'],
       min: 0,
     },
+    stockQuantity: {
+      type: Number,
+      min: 0,
+      default: 0,
+    },
     compareAtPrice: {
       type: Number, // Original price before discount
       min: 0,

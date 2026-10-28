@@ -35,6 +35,56 @@
   margin-bottom: 1.5rem;
 }
 
+.add-product-section {
+  margin-bottom: 3rem;
+  padding: 1.5rem;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  background: #fff;
+}
+
+.add-product-form {
+  display: grid;
+  gap: 1.5rem;
+}
+
+.add-product-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1.25rem;
+}
+
+.add-product-grid label {
+  display: grid;
+  gap: 0.5rem;
+  color: var(--text-primary);
+  font-weight: 500;
+}
+
+.add-product-grid input:not([type="checkbox"]),
+.add-product-grid select,
+.add-product-grid textarea {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  font: inherit;
+}
+
+.add-product-wide {
+  grid-column: 1 / -1;
+}
+
+.add-product-publish {
+  display: flex !important;
+  align-items: center;
+  gap: 0.6rem !important;
+}
+
+.add-product-form > button {
+  justify-self: start;
+}
+
 .admin-status {
   padding: 2rem 0;
   color: var(--text-secondary);
@@ -119,6 +169,14 @@
     flex-direction: column;
     align-items: flex-start;
     gap: 1.5rem;
+  }
+
+  .add-product-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .add-product-wide {
+    grid-column: auto;
   }
 }
 .admin-action-btns {

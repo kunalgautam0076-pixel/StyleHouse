@@ -7,35 +7,61 @@ import Product from '../models/Product.js';
 // @access  Private/Admin
 export const createProduct = async (req, res, next) => {
   try {
-    const category = await Category.findOne({ isActive: true }).sort('name');
+    const { name, description, price, category: categoryId, images } = req.body;
+    if (
+      typeof name !== 'string' || !name.trim()
+      || typeof description !== 'string' || !description.trim()
+      || !mongoose.isValidObjectId(categoryId)
+      || !Array.isArray(images) || !images[0]?.url
+      || !Number.isFinite(Number(price)) || Number(price) < 0
+      || (req.body.stockQuantity !== undefined
+        && (!Number.isInteger(Number(req.body.stockQuantity)) || Number(req.body.stockQuantity) < 0))
+    ) {
+      return res.status(400).json({
+        success: false,
+        message: 'Provide a name, description, valid category, image URL, non-negative price, and valid stock quantity.',
+      });
+    }
+
+    const category = await Category.findOne({
+      _id: categoryId,
+      isActive: true,
+    });
 
     if (!category) {
       return res.status(400).json({
         success: false,
-        message: 'Create an active category before adding products.',
+        message: 'Select an active category.',
       });
     }
 
     const productId = new mongoose.Types.ObjectId();
+    const slugBase = req.body.name
+      .trim()
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/(^-|-$)/g, '') || 'product';
     const product = await Product.create({
       _id: productId,
-      name: 'New Product',
-      slug: `new-product-${productId.toString()}`,
-      description: 'Add a product description.',
-      brand: 'StyleHouse',
+      name: req.body.name,
+      slug: `${slugBase}-${productId.toString()}`,
+      description: req.body.description,
+      brand: req.body.brand || 'StyleHouse',
       category: category._id,
-      images: [{
-        url: 'https://placehold.co/600x800?text=New+Product',
-        publicId: 'draft-placeholder',
-        isPrimary: true,
-      }],
-      price: 0,
-      isPublished: false,
+      images: (req.body.images || []).map((image, index) => ({
+        ...image,
+        publicId: image.publicId || `admin-${productId}-${index}`,
+        isPrimary: image.isPrimary ?? index === 0,
+      })),
+      price: req.body.price,
+      compareAtPrice: req.body.compareAtPrice,
+      stockQuantity: req.body.stockQuantity,
+      isPublished: req.body.isPublished ?? false,
     });
 
     res.status(201).json({
       success: true,
-      data: product,
+      data: await product.populate('category', 'name slug'),
     });
   } catch (error) {
     next(error);
