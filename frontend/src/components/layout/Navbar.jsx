@@ -2,15 +2,19 @@ import React, { useContext, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Search, ShoppingBag, Heart, User, Menu, X } from 'lucide-react';
 import { AuthContext } from '../../context/AuthContext';
-import logo from '../../assets/logo.png'; // Make sure to save the logo image in src/assets/
+import { CartContext } from '../../context/CartContext'; // <-- ADD THIS
+import logo from '../../assets/logo.png';
 import './Navbar.css';
 
 const Navbar = () => {
   const { user, logout } = useContext(AuthContext);
+  const { getCartCount } = useContext(CartContext); // <-- ADD THIS
   const [isOpen, setIsOpen] = useState(false);
 
   const toggleMenu = () => setIsOpen(!isOpen);
   const closeMenu = () => setIsOpen(false);
+
+  const cartCount = getCartCount();
 
   return (
     <nav className="navbar">
@@ -21,7 +25,6 @@ const Navbar = () => {
           </Link>
         </div>
         
-        {/* Desktop & Mobile Navigation Links */}
         <ul className={`nav-links ${isOpen ? 'active' : ''}`}>
           <li><Link to="/" onClick={closeMenu}>Home</Link></li>
           <li><Link to="/shop" onClick={closeMenu}>Shop</Link></li>
@@ -31,7 +34,12 @@ const Navbar = () => {
         <div className="nav-icons">
           <button className="icon-btn" aria-label="Search"><Search size={20} strokeWidth={1.5} /></button>
           <Link to="/wishlist" className="icon-btn" aria-label="Wishlist"><Heart size={20} strokeWidth={1.5} /></Link>
-          <Link to="/cart" className="icon-btn" aria-label="Cart"><ShoppingBag size={20} strokeWidth={1.5} /></Link>
+          
+          {/* Cart Icon with Badge */}
+          <Link to="/cart" className="icon-btn cart-icon-wrapper" aria-label="Cart">
+            <ShoppingBag size={20} strokeWidth={1.5} />
+            {cartCount > 0 && <span className="cart-badge">{cartCount}</span>}
+          </Link>
           
           <div className="account-menu hide-on-mobile">
             {user ? (
@@ -44,7 +52,6 @@ const Navbar = () => {
             )}
           </div>
 
-          {/* Mobile Hamburger Menu */}
           <button className="icon-btn mobile-toggle" onClick={toggleMenu} aria-label="Toggle menu">
             {isOpen ? <X size={24} strokeWidth={1.5} /> : <Menu size={24} strokeWidth={1.5} />}
           </button>

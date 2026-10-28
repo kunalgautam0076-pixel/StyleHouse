@@ -6,10 +6,12 @@ import Footer from './components/layout/Footer';
 // Page Imports
 import Home from './pages/Home';
 import Shop from './pages/Shop';
+import ProductDetails from './pages/ProductDetails'
 import Login from './pages/Login';
 import Register from './pages/Register';
 import Account from './pages/Account';
 import NotFound from './pages/NotFound';
+import Cart from './pages/Cart';
 
 function App() {
   return (
@@ -22,9 +24,11 @@ function App() {
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/shop" element={<Shop />} />
+            <Route path="/product/:slug" element={<ProductDetails />} />
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
             <Route path="/account" element={<Account />} />
+            <Route path="/cart" element={<Cart />} />
             
             {/* 404 Catch-all */}
             <Route path="*" element={<NotFound />} />
