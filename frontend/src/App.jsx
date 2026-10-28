@@ -1,7 +1,8 @@
-import React from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import React, { useContext } from 'react';
+import { BrowserRouter as Router, Routes, Route, Navigate, Outlet } from 'react-router-dom';
 import Navbar from './components/layout/Navbar';
 import Footer from './components/layout/Footer';
+import { AuthContext } from './context/AuthContext';
 
 // Page Imports
 import Home from './pages/Home';
@@ -16,6 +17,14 @@ import Checkout from './pages/Checkout';
 import AdminDashboard from './pages/admin/AdminDashboard';
 import EditProduct from './pages/admin/EditProduct';
 import Wishlist from './pages/Wishlist';
+
+const AdminRoute = () => {
+  const { user } = useContext(AuthContext);
+
+  if (!user) return <Navigate to="/login" replace />;
+  if (user.role !== 'admin') return <Navigate to="/account" replace />;
+  return <Outlet />;
+};
 
 function App() {
   return (
@@ -34,8 +43,10 @@ function App() {
             <Route path="/account" element={<Account />} />
             <Route path="/cart" element={<Cart />} />
             <Route path="/checkout" element={<Checkout />} />
-            <Route path="/admin" element={<AdminDashboard />} />
-            <Route path="/admin/product/:id/edit" element={<EditProduct />} />
+            <Route element={<AdminRoute />}>
+              <Route path="/admin" element={<AdminDashboard />} />
+              <Route path="/admin/product/:id/edit" element={<EditProduct />} />
+            </Route>
             <Route path="/wishlist" element={<Wishlist />} />
             
             {/* 404 Catch-all */}

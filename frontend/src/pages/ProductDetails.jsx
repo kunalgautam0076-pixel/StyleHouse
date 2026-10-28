@@ -2,6 +2,7 @@ import React, { useState, useEffect, useContext } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import api from '../services/api';
 import { CartContext } from '../context/CartContext';
+import { formatCurrency } from '../utils/currency';
 import './ProductDetails.css';
 
 const ProductDetails = () => {
@@ -72,7 +73,7 @@ const ProductDetails = () => {
         {/* Product Info & Actions */}
         <div className="pd-info-section">
           <h1 className="pd-title">{product.name}</h1>
-          <p className="pd-price">${product.price.toFixed(2)}</p>
+          <p className="pd-price">{formatCurrency(product.price)}</p>
           
           <div className="pd-description">
             <p>{product.description}</p>

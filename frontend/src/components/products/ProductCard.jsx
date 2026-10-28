@@ -2,6 +2,7 @@ import React, { useContext } from 'react';
 import { Link } from 'react-router-dom';
 import { Heart } from 'lucide-react';
 import { WishlistContext } from '../../context/WishlistContext';
+import { formatCurrency } from '../../utils/currency';
 import './ProductCard.css';
 
 const ProductCard = ({ product }) => {
@@ -33,7 +34,7 @@ const ProductCard = ({ product }) => {
           <h3 className="product-name">{product.name}</h3>
         </Link>
         <div className="product-price-container">
-          <span className="product-price">${product.price.toFixed(2)}</span>
+          <span className="product-price">{formatCurrency(product.price)}</span>
         </div>
       </div>
     </div>

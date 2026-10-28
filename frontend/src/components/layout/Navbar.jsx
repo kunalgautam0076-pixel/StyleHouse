@@ -15,36 +15,55 @@ const Navbar = () => {
   const closeMenu = () => setIsOpen(false);
 
   const cartCount = getCartCount();
+  const isAdmin = user?.role === 'admin';
 
   return (
     <nav className="navbar">
       <div className="container nav-container">
         <div className="nav-brand">
-          <Link to="/" onClick={closeMenu}>
+          <Link to={isAdmin ? '/admin' : '/'} onClick={closeMenu}>
             <img src={logo} alt="StyleHouse" className="nav-logo" />
           </Link>
         </div>
         
         <ul className={`nav-links ${isOpen ? 'active' : ''}`}>
-          <li><Link to="/" onClick={closeMenu}>Home</Link></li>
-          <li><Link to="/shop" onClick={closeMenu}>Shop</Link></li>
-          <li><Link to="/shop?category=new-arrivals" onClick={closeMenu}>New Arrivals</Link></li>
+          {isAdmin ? (
+            <>
+              <li><Link to="/admin" onClick={closeMenu}>Dashboard</Link></li>
+              <li><Link to="/admin#inventory" onClick={closeMenu}>Products</Link></li>
+            </>
+          ) : (
+            <>
+              <li><Link to="/" onClick={closeMenu}>Home</Link></li>
+              <li><Link to="/shop" onClick={closeMenu}>Shop</Link></li>
+              <li><Link to="/shop?category=new-arrivals" onClick={closeMenu}>New Arrivals</Link></li>
+            </>
+          )}
         </ul>
 
         <div className="nav-icons">
-          <button className="icon-btn" aria-label="Search"><Search size={20} strokeWidth={1.5} /></button>
-          <Link to="/wishlist" className="icon-btn" aria-label="Wishlist"><Heart size={20} strokeWidth={1.5} /></Link>
+          {!isAdmin && (
+            <>
+              <button className="icon-btn" aria-label="Search"><Search size={20} strokeWidth={1.5} /></button>
+              <Link to="/wishlist" className="icon-btn" aria-label="Wishlist"><Heart size={20} strokeWidth={1.5} /></Link>
           
-          {/* Cart Icon with Badge */}
-          <Link to="/cart" className="icon-btn cart-icon-wrapper" aria-label="Cart">
-            <ShoppingBag size={20} strokeWidth={1.5} />
-            {cartCount > 0 && <span className="cart-badge">{cartCount}</span>}
-          </Link>
+              <Link to="/cart" className="icon-btn cart-icon-wrapper" aria-label="Cart">
+                <ShoppingBag size={20} strokeWidth={1.5} />
+                {cartCount > 0 && <span className="cart-badge">{cartCount}</span>}
+              </Link>
+            </>
+          )}
           
           <div className="account-menu hide-on-mobile">
             {user ? (
               <div className="user-dropdown">
-                <Link to="/account" className="icon-btn" aria-label="Account"><User size={20} strokeWidth={1.5} /></Link>
+                <Link
+                  to={user.role === 'admin' ? '/admin' : '/account'}
+                  className="icon-btn"
+                  aria-label={user.role === 'admin' ? 'Admin dashboard' : 'Account'}
+                >
+                  <User size={20} strokeWidth={1.5} />
+                </Link>
                 <button onClick={logout} className="logout-text">Logout</button>
               </div>
             ) : (

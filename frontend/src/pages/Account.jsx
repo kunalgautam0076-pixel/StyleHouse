@@ -1,12 +1,14 @@
 import React, { useContext, useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
 import api from '../services/api';
+import { formatCurrency } from '../utils/currency';
 import './Account.css';
 
 const Account = () => {
   const { user, logout } = useContext(AuthContext);
   const navigate = useNavigate();
+  const location = useLocation();
   
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -46,6 +48,10 @@ const Account = () => {
         <h1>My Account</h1>
         <button className="btn-logout" onClick={handleLogout}>Log Out</button>
       </div>
+
+      {location.state?.notice && (
+        <div className="account-notice" role="status">{location.state.notice}</div>
+      )}
 
       <div className="account-layout">
         {/* Profile Sidebar */}
@@ -91,14 +97,14 @@ const Account = () => {
                       <div key={index} className="order-item-row">
                         <span className="item-qty">{item.qty}x</span>
                         <span className="item-name">{item.name} (Size: {item.size})</span>
-                        <span className="item-price">${(item.price * item.qty).toFixed(2)}</span>
+                        <span className="item-price">{formatCurrency(item.price * item.qty)}</span>
                       </div>
                     ))}
                   </div>
                   
                   <div className="order-footer">
                     <span className="order-total-label">Total:</span>
-                    <span className="order-total-amount">${order.totalPrice.toFixed(2)}</span>
+                    <span className="order-total-amount">{formatCurrency(order.totalPrice)}</span>
                   </div>
                 </div>
               ))}

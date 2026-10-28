@@ -2,6 +2,7 @@ import React, { useContext } from 'react';
 import { Link } from 'react-router-dom';
 import { Trash2 } from 'lucide-react';
 import { CartContext } from '../context/CartContext';
+import { formatCurrency } from '../utils/currency';
 import './Cart.css';
 
 const Cart = () => {
@@ -35,7 +36,7 @@ const Cart = () => {
                     {item.product.name}
                   </Link>
                   <p className="cart-item-size">Size: {item.size}</p>
-                  <p className="cart-item-price">${item.product.price.toFixed(2)}</p>
+                  <p className="cart-item-price">{formatCurrency(item.product.price)}</p>
                 </div>
 
                 <div className="cart-item-actions">
@@ -61,7 +62,7 @@ const Cart = () => {
           <h3>Order Summary</h3>
           <div className="summary-row">
             <span>Subtotal</span>
-            <span>${getCartTotal().toFixed(2)}</span>
+            <span>{formatCurrency(getCartTotal())}</span>
           </div>
           <div className="summary-row">
             <span>Shipping</span>
@@ -69,7 +70,7 @@ const Cart = () => {
           </div>
           <div className="summary-row total">
             <span>Total</span>
-            <span>${getCartTotal().toFixed(2)}</span>
+            <span>{formatCurrency(getCartTotal())}</span>
           </div>
           <Link to="/checkout" className="btn-checkout">Proceed to Checkout</Link>
         </div>

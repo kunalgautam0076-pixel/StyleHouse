@@ -36,9 +36,14 @@ const orderSchema = new mongoose.Schema(
     },
     paymentResult: {
       id: { type: String },
+      orderId: { type: String },
       status: { type: String },
       update_time: { type: String },
       email_address: { type: String },
+    },
+    razorpayOrderId: {
+      type: String,
+      sparse: true,
     },
     itemsPrice: { type: Number, required: true, default: 0.0 },
     shippingPrice: { type: Number, required: true, default: 0.0 },
@@ -50,7 +55,7 @@ const orderSchema = new mongoose.Schema(
     orderStatus: { 
       type: String, 
       required: true, 
-      enum: ['Processing', 'Shipped', 'Delivered', 'Cancelled'],
+      enum: ['Payment Pending', 'Processing', 'Shipped', 'Delivered', 'Cancelled'],
       default: 'Processing'
     }
   },

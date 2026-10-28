@@ -1,10 +1,28 @@
 import React, { useContext, useState, useEffect } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { CartContext } from '../context/CartContext';
 import { AuthContext } from '../context/AuthContext';
 import api from '../services/api';
+import { formatCurrency } from '../utils/currency';
 import './Checkout.css';
+
+const loadRazorpayScript = () => new Promise((resolve) => {
+  if (window.Razorpay) {
+    resolve(true);
+    return;
+  }
+
+  const script = document.createElement('script');
+  script.src = 'https://checkout.razorpay.com/v1/checkout.js';
+  script.async = true;
+  script.onload = () => resolve(true);
+  script.onerror = () => {
+    script.remove();
+    resolve(false);
+  };
+  document.body.appendChild(script);
+});
 
 const Checkout = () => {
   const { cartItems, getCartTotal, clearCart } = useContext(CartContext);
@@ -14,6 +32,7 @@ const Checkout = () => {
   
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState('');
+  const [paymentMethod, setPaymentMethod] = useState('Razorpay');
 
   // Redirect if cart is empty or user is not logged in
   useEffect(() => {
@@ -25,44 +44,80 @@ const Checkout = () => {
   }, [user, cartItems, navigate]);
 
   const itemsPrice = getCartTotal();
-  const shippingPrice = itemsPrice > 200 ? 0 : 15; // Free shipping over $200
+  const shippingPrice = itemsPrice > 200 ? 0 : 15;
   const totalPrice = itemsPrice + shippingPrice;
 
   const onSubmit = async (data) => {
     try {
       setIsSubmitting(true);
       setError('');
-
-      // Format cart items for the backend
-      const orderItems = cartItems.map(item => ({
-        name: item.product.name,
-        qty: item.quantity,
-        image: item.product.images?.find(img => img.isPrimary)?.url || item.product.images?.[0]?.url,
-        price: item.product.price,
-        size: item.size,
-        product: item.product._id
-      }));
-
-      const orderData = {
-        orderItems,
+      const orderRequest = {
+        cartItems: cartItems.map(item => ({
+          productId: item.product._id,
+          quantity: item.quantity,
+          size: item.size,
+        })),
         shippingAddress: data,
-        paymentMethod: 'COD', // Defaulting to Cash on Delivery for now
-        itemsPrice,
-        shippingPrice,
-        totalPrice,
       };
 
-      // Send to backend
-      const response = await api.post('/orders', orderData);
-      
-      if (response.data.success) {
+      if (paymentMethod === 'COD') {
+        await api.post('/orders', orderRequest);
         clearCart();
-        alert('Order placed successfully!');
-        navigate('/account'); // Redirect to account dashboard
+        navigate('/account', { state: { notice: 'Your order has been placed.' } });
+        return;
       }
+
+      const scriptLoaded = await loadRazorpayScript();
+      if (!scriptLoaded) {
+        throw new Error('Razorpay Checkout could not be loaded. Check your connection and try again.');
+      }
+
+      const { data: orderResponse } = await api.post('/orders/razorpay', orderRequest);
+      const paymentOrder = orderResponse.data;
+      const checkout = new window.Razorpay({
+        key: paymentOrder.keyId,
+        amount: paymentOrder.amount,
+        currency: paymentOrder.currency,
+        name: 'StyleHouse',
+        description: 'Secure order payment',
+        order_id: paymentOrder.razorpayOrderId,
+        prefill: {
+          name: data.fullName,
+          email: user.email,
+          contact: data.phone,
+        },
+        notes: {
+          orderId: paymentOrder.orderId,
+        },
+        theme: { color: '#1a1a1a' },
+        handler: async paymentResponse => {
+          try {
+            await api.post('/orders/verify-payment', {
+              orderId: paymentOrder.orderId,
+              ...paymentResponse,
+            });
+            clearCart();
+            navigate('/account', { state: { notice: 'Payment successful. Your order is confirmed.' } });
+          } catch (verificationError) {
+            setError(
+              verificationError.response?.data?.message
+              || 'Payment was received but could not be verified. Please contact support before retrying.'
+            );
+            setIsSubmitting(false);
+          }
+        },
+        modal: {
+          ondismiss: () => setIsSubmitting(false),
+        },
+      });
+
+      checkout.on('payment.failed', paymentFailure => {
+        setError(paymentFailure.error?.description || 'Payment failed. Please try again.');
+        setIsSubmitting(false);
+      });
+      checkout.open();
     } catch (err) {
-      setError(err.response?.data?.message || 'Failed to place order. Please try again.');
-    } finally {
+      setError(err.response?.data?.message || err.message || 'Failed to place order. Please try again.');
       setIsSubmitting(false);
     }
   };
@@ -143,6 +198,36 @@ const Checkout = () => {
                 {errors.phone && <span className="error-text">{errors.phone.message}</span>}
               </div>
             </div>
+
+            <fieldset className="payment-methods">
+              <legend>Payment method</legend>
+              <label className={`payment-option ${paymentMethod === 'Razorpay' ? 'selected' : ''}`}>
+                <input
+                  type="radio"
+                  name="paymentMethod"
+                  value="Razorpay"
+                  checked={paymentMethod === 'Razorpay'}
+                  onChange={() => setPaymentMethod('Razorpay')}
+                />
+                <span>
+                  <strong>Pay online with Razorpay</strong>
+                  <small>UPI, cards, net banking and supported wallets</small>
+                </span>
+              </label>
+              <label className={`payment-option ${paymentMethod === 'COD' ? 'selected' : ''}`}>
+                <input
+                  type="radio"
+                  name="paymentMethod"
+                  value="COD"
+                  checked={paymentMethod === 'COD'}
+                  onChange={() => setPaymentMethod('COD')}
+                />
+                <span>
+                  <strong>Cash on delivery</strong>
+                  <small>Pay when your order arrives</small>
+                </span>
+              </label>
+            </fieldset>
           </form>
         </div>
 
@@ -157,7 +242,7 @@ const Checkout = () => {
                   <span className="item-qty">{item.quantity}x</span>
                   <span className="item-name">{item.product.name} (Size: {item.size})</span>
                 </div>
-                <span className="item-price">${(item.product.price * item.quantity).toFixed(2)}</span>
+                <span className="item-price">{formatCurrency(item.product.price * item.quantity)}</span>
               </div>
             ))}
           </div>
@@ -165,15 +250,15 @@ const Checkout = () => {
           <div className="summary-totals">
             <div className="summary-row">
               <span>Subtotal</span>
-              <span>${itemsPrice.toFixed(2)}</span>
+              <span>{formatCurrency(itemsPrice)}</span>
             </div>
             <div className="summary-row">
               <span>Shipping</span>
-              <span>{shippingPrice === 0 ? 'Free' : `$${shippingPrice.toFixed(2)}`}</span>
+              <span>{shippingPrice === 0 ? 'Free' : formatCurrency(shippingPrice)}</span>
             </div>
             <div className="summary-row total">
               <span>Total</span>
-              <span>${totalPrice.toFixed(2)}</span>
+              <span>{formatCurrency(totalPrice)}</span>
             </div>
           </div>
 
@@ -183,7 +268,9 @@ const Checkout = () => {
             className="btn-place-order"
             disabled={isSubmitting}
           >
-            {isSubmitting ? 'Processing...' : 'Place Order (COD)'}
+            {isSubmitting
+              ? 'Processing...'
+              : paymentMethod === 'COD' ? 'Place Order' : `Pay ${formatCurrency(totalPrice)}`}
           </button>
         </div>
       </div>

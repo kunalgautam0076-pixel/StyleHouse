@@ -30,6 +30,16 @@
   color: var(--error-color);
 }
 
+.account-notice {
+  margin: -1.5rem 0 2rem;
+  padding: 0.9rem 1rem;
+  border: 1px solid #c8dfcc;
+  border-radius: var(--radius-sm);
+  background: #edf6ef;
+  color: #28643a;
+  font-size: 0.9rem;
+}
+
 .account-layout {
   display: grid;
   grid-template-columns: 300px 1fr;

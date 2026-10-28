@@ -1,12 +1,15 @@
 import React, { useEffect, useState, useContext } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { BadgeCheck, Boxes, FileEdit, Package, Search, TriangleAlert } from 'lucide-react';
 import { AuthContext } from '../../context/AuthContext';
 import api from '../../services/api';
+import { formatCurrency } from '../../utils/currency';
 import './AdminDashboard.css';
 
 const AdminDashboard = () => {
   const { user } = useContext(AuthContext);
   const navigate = useNavigate();
+  const { hash } = useLocation();
 
   const [products, setProducts] = useState([]);
   const [categories, setCategories] = useState([]);
@@ -15,6 +18,8 @@ const AdminDashboard = () => {
   const [showAddProduct, setShowAddProduct] = useState(false);
   const [isSavingProduct, setIsSavingProduct] = useState(false);
   const [formError, setFormError] = useState('');
+  const [searchTerm, setSearchTerm] = useState('');
+  const [statusFilter, setStatusFilter] = useState('all');
   const [newProduct, setNewProduct] = useState({
     name: '',
     description: '',
@@ -42,34 +47,34 @@ const AdminDashboard = () => {
     }
   }
   
-  // NEW: Add a small delay to wait for AuthContext to fetch the user
-  const [isCheckingAuth, setIsCheckingAuth] = useState(true);
+  useEffect(() => {
+    if (user?.role === 'admin') {
+      Promise.resolve().then(fetchAdminData);
+    }
+  }, [user]);
 
   useEffect(() => {
-    // Wait for 800ms to allow AuthContext to restore the user session
-    const timer = setTimeout(() => {
-      setIsCheckingAuth(false);
-    }, 800);
-    return () => clearTimeout(timer);
-  }, []);
-
-  // Protect route
-  useEffect(() => {
-    if (isCheckingAuth) return; // Do nothing while waiting for auth check
-
-    if (!user) {
-      navigate('/login');
-      return;
+    if (hash === '#inventory') {
+      document.getElementById('inventory')?.scrollIntoView({ behavior: 'smooth' });
     }
-    
-    if (user.role !== 'admin') {
-      alert(`Access denied. Your current role is: "${user.role}". You must be an "admin" in MongoDB.`);
-      navigate('/account');
-      return;
-    }
+  }, [hash]);
 
-    fetchAdminData();
-  }, [user, isCheckingAuth, navigate]);
+  const publishedCount = products.filter(product => product.isPublished).length;
+  const draftCount = products.length - publishedCount;
+  const lowStockCount = products.filter(product => {
+    const stock = product.variants?.length
+      ? product.variants.reduce((total, variant) => total + (variant.stockQuantity || 0), 0)
+      : (product.stockQuantity || 0);
+    return stock <= 5;
+  }).length;
+  const visibleProducts = products.filter(product => {
+    const matchesSearch = `${product.name} ${product.category?.name || ''}`
+      .toLowerCase()
+      .includes(searchTerm.toLowerCase());
+    const matchesStatus = statusFilter === 'all'
+      || (statusFilter === 'published' ? product.isPublished : !product.isPublished);
+    return matchesSearch && matchesStatus;
+  });
 
   const handleCreateProduct = async (event) => {
     event.preventDefault();
@@ -111,20 +116,11 @@ const AdminDashboard = () => {
     if (!window.confirm('Are you sure you want to delete this product?')) return;
     try {
       await api.delete(`/products/${id}`);
-      setProducts(products.filter(p => p._id !== id));
+      setProducts(currentProducts => currentProducts.filter(product => product._id !== id));
     } catch (err) {
       alert(err.response?.data?.message || 'Failed to delete product');
     }
   };
-
-  // Show a loading screen while waiting for the auth check
-  if (isCheckingAuth) {
-    return (
-      <div className="container" style={{ paddingTop: '5rem', textAlign: 'center' }}>
-        <h2>Verifying Admin Credentials...</h2>
-      </div>
-    );
-  }
 
   if (!user || user.role !== 'admin') return null;
 
@@ -132,8 +128,9 @@ const AdminDashboard = () => {
     <div className="container admin-container">
       <div className="admin-header">
         <div>
-          <h1>Admin Dashboard</h1>
-          <p>Manage your store inventory and catalog</p>
+          <span className="admin-eyebrow">STORE MANAGEMENT</span>
+          <h1>Dashboard</h1>
+          <p>Welcome back, {user.name?.split(' ')[0] || 'Admin'}. Here’s what’s happening with your store.</p>
         </div>
         <button
           onClick={() => {
@@ -147,6 +144,44 @@ const AdminDashboard = () => {
       </div>
 
       {error && <div className="admin-error">{error}</div>}
+
+      <section className="admin-overview" aria-label="Store overview">
+        <article className="admin-stat-card">
+          <span className="admin-stat-icon"><Package size={20} /></span>
+          <span className="admin-stat-label">Total products</span>
+          <strong>{products.length}</strong>
+          <span className="admin-stat-note">Across your catalog</span>
+        </article>
+        <article className="admin-stat-card">
+          <span className="admin-stat-icon is-published"><BadgeCheck size={20} /></span>
+          <span className="admin-stat-label">Published</span>
+          <strong>{publishedCount}</strong>
+          <span className="admin-stat-note">Visible in the storefront</span>
+        </article>
+        <article className="admin-stat-card">
+          <span className="admin-stat-icon is-draft"><FileEdit size={20} /></span>
+          <span className="admin-stat-label">Drafts</span>
+          <strong>{draftCount}</strong>
+          <span className="admin-stat-note">Products still being prepared</span>
+        </article>
+        <article className="admin-stat-card">
+          <span className="admin-stat-icon is-alert"><TriangleAlert size={20} /></span>
+          <span className="admin-stat-label">Low stock</span>
+          <strong>{lowStockCount}</strong>
+          <span className="admin-stat-note">Products with 5 or fewer units</span>
+        </article>
+      </section>
+
+      <section className="admin-category-summary">
+        <div>
+          <span className="admin-summary-icon"><Boxes size={20} /></span>
+          <div>
+            <strong>{categories.length} active categories</strong>
+            <p>Keep your catalog organized for shoppers.</p>
+          </div>
+        </div>
+        <span className="admin-summary-caption">CATALOG OVERVIEW</span>
+      </section>
 
       {showAddProduct && (
         <section className="admin-section add-product-section">
@@ -175,7 +210,7 @@ const AdminDashboard = () => {
                   />
                 </label>
                 <label>
-                  Price ($)
+                  Price (₹)
                   <input
                     name="price"
                     type="number"
@@ -187,7 +222,7 @@ const AdminDashboard = () => {
                   />
                 </label>
                 <label>
-                  Compare-at price ($)
+                  Compare-at price (₹)
                   <input
                     name="compareAtPrice"
                     type="number"
@@ -260,13 +295,45 @@ const AdminDashboard = () => {
         </section>
       )}
 
-      <div className="admin-section">
-        <h2>Product Inventory ({products.length})</h2>
+      <div className="admin-section" id="inventory">
+        <div className="inventory-heading">
+          <div>
+            <span className="admin-eyebrow">CATALOG</span>
+            <h2>Product inventory <span className="inventory-count">{products.length}</span></h2>
+          </div>
+          <label className="inventory-search">
+            <Search size={17} aria-hidden="true" />
+            <input
+              type="search"
+              placeholder="Search products"
+              value={searchTerm}
+              onChange={event => setSearchTerm(event.target.value)}
+              aria-label="Search products"
+            />
+          </label>
+        </div>
+
+        <div className="inventory-filters" role="group" aria-label="Filter products by status">
+          {[
+            ['all', `All products (${products.length})`],
+            ['published', `Published (${publishedCount})`],
+            ['draft', `Drafts (${draftCount})`],
+          ].map(([filter, label]) => (
+            <button
+              key={filter}
+              type="button"
+              className={statusFilter === filter ? 'active' : ''}
+              onClick={() => setStatusFilter(filter)}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
 
         {loading ? (
           <p className="admin-status">Loading inventory...</p>
-        ) : products.length === 0 ? (
-          <p className="admin-status">No products found.</p>
+        ) : visibleProducts.length === 0 ? (
+          <p className="admin-status">{products.length ? 'No products match your filters.' : 'No products found.'}</p>
         ) : (
           <div className="admin-table-wrapper">
             <table className="admin-table">
@@ -274,13 +341,18 @@ const AdminDashboard = () => {
                 <tr>
                   <th>Product</th>
                   <th>Category</th>
+                  <th>Stock</th>
                   <th>Price</th>
                   <th>Status</th>
                   <th>Actions</th>
                 </tr>
               </thead>
               <tbody>
-                {products.map(product => (
+                {visibleProducts.map(product => {
+                  const stock = product.variants?.length
+                    ? product.variants.reduce((total, variant) => total + (variant.stockQuantity || 0), 0)
+                    : (product.stockQuantity || 0);
+                  return (
                   <tr key={product._id}>
                     <td className="product-cell">
                       <img 
@@ -291,7 +363,11 @@ const AdminDashboard = () => {
                       <span>{product.name}</span>
                     </td>
                     <td>{product.category?.name || 'Unassigned'}</td>
-                    <td>${product.price.toFixed(2)}</td>
+                    <td>
+                      <span className={stock <= 5 ? 'stock-value is-low' : 'stock-value'}>{stock}</span>
+                      <span className="stock-unit"> units</span>
+                    </td>
+                    <td>{formatCurrency(product.price)}</td>
                     <td>
                       <span className={`badge ${product.isPublished ? 'published' : 'draft'}`}>
                         {product.isPublished ? 'Published' : 'Draft'}
@@ -314,7 +390,8 @@ const AdminDashboard = () => {
                       </div>
                     </td>
                   </tr>
-                ))}
+                  );
+                })}
               </tbody>
             </table>
           </div>

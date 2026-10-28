@@ -2,6 +2,7 @@ import React, { useContext } from 'react';
 import { Link } from 'react-router-dom';
 import { WishlistContext } from '../context/WishlistContext';
 import { Trash2, ShoppingBag } from 'lucide-react';
+import { formatCurrency } from '../utils/currency';
 import './Wishlist.css';
 
 const Wishlist = () => {
@@ -43,7 +44,7 @@ const Wishlist = () => {
                 <Link to={`/product/${product.slug}`}>
                   <h3>{product.name}</h3>
                 </Link>
-                <p className="wishlist-price">${product.price.toFixed(2)}</p>
+                <p className="wishlist-price">{formatCurrency(product.price)}</p>
                 <Link to={`/product/${product.slug}`} className="btn-view-product">
                   <ShoppingBag size={16} strokeWidth={1.5} /> View & Select Size
                 </Link>

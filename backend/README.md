@@ -1,16 +1,24 @@
-# React + Vite
+# StyleHouse API
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+## Razorpay checkout setup
 
-Currently, two official plugins are available:
+The backend creates INR Razorpay orders from product prices stored in MongoDB,
+verifies the payment signature, and captures authorized payments before marking
+an order paid.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+1. Create API keys in the Razorpay Dashboard. Use **Test Mode** keys while
+   developing.
+2. Add these values to `backend/.env` (never commit the secret):
 
-## React Compiler
+   ```env
+   RAZORPAY_KEY_ID=rzp_test_your_key_id
+   RAZORPAY_KEY_SECRET=your_test_key_secret
+   ```
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+3. Restart the backend. The API returns a configuration error until both keys
+   are present.
+4. Complete a test checkout using a Razorpay-supported test payment method.
+   Switch to live keys only after configuring and testing the Razorpay account.
 
-## Expanding the Oxlint configuration
-
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and Oxlint's TypeScript related rules in your project.
+Product prices are treated as Indian rupees (INR). Checkout shipping is INR 15
+for orders up to INR 200 and free for orders above INR 200.

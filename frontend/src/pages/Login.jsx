@@ -15,8 +15,8 @@ const Login = () => {
     try {
       setIsLoading(true);
       setServerError('');
-      const result = await login(data.email, data.password);
-      navigate(result.user.role === 'admin' ? '/admin' : '/account');
+      const { user: authenticatedUser } = await login(data.email, data.password);
+      navigate(authenticatedUser.role === 'admin' ? '/admin' : '/', { replace: true });
     } catch (error) {
       setServerError(error.response?.data?.message || 'Login failed.');
     } finally {
@@ -26,8 +26,7 @@ const Login = () => {
 
   useEffect(() => {
     if (user) {
-      // Send admins to /admin, and regular users to /account
-      navigate(user.role === 'admin' ? '/admin' : '/account');
+      navigate(user.role === 'admin' ? '/admin' : '/', { replace: true });
     }
   }, [user, navigate]);
 

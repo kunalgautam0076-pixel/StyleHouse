@@ -124,7 +124,7 @@ const EditProduct = () => {
 
         <div className="form-row">
           <div className="form-group half">
-            <label>Price ($)</label>
+            <label>Price (₹)</label>
             <input 
               type="number" 
               step="0.01" 
@@ -135,7 +135,7 @@ const EditProduct = () => {
             />
           </div>
           <div className="form-group half">
-            <label>Compare at Price ($)</label>
+            <label>Compare at Price (₹)</label>
             <input 
               type="number" 
               step="0.01" 
