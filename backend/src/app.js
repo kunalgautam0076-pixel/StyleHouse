@@ -1,0 +1,47 @@
+import express from 'express';
+import cors from 'cors';
+import helmet from 'helmet';
+import cookieParser from 'cookie-parser';
+import rateLimit from 'express-rate-limit';
+
+// Route imports
+import authRoutes from './routes/authRoutes.js'; // <-- ADD THIS
+
+const app = express();
+
+app.use(helmet());
+app.use(cors({
+  origin: process.env.CLIENT_URL || 'http://localhost:5173',
+  credentials: true,
+}));
+
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  limit: 100,
+  message: 'Too many requests from this IP, please try again later.'
+});
+app.use('/api', limiter);
+
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+app.use(cookieParser());
+
+// Health Check
+app.get('/api/v1/health', (req, res) => {
+  res.status(200).json({ success: true, message: 'LUXE API is running' });
+});
+
+// Mount Routes
+app.use('/api/v1/auth', authRoutes); // <-- ADD THIS
+
+// Centralized Error Handler
+app.use((err, req, res, next) => {
+  const statusCode = err.statusCode || 500;
+  res.status(statusCode).json({
+    success: false,
+    message: err.message || 'Internal Server Error',
+    stack: process.env.NODE_ENV === 'production' ? null : err.stack,
+  });
+});
+
+export default app;
