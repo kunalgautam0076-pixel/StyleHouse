@@ -11,20 +11,35 @@ const AdminDashboard = () => {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  
+  // NEW: Add a small delay to wait for AuthContext to fetch the user
+  const [isCheckingAuth, setIsCheckingAuth] = useState(true);
 
-  // Protect route: Ensure user is logged in and is an admin
   useEffect(() => {
+    // Wait for 800ms to allow AuthContext to restore the user session
+    const timer = setTimeout(() => {
+      setIsCheckingAuth(false);
+    }, 800);
+    return () => clearTimeout(timer);
+  }, []);
+
+  // Protect route
+  useEffect(() => {
+    if (isCheckingAuth) return; // Do nothing while waiting for auth check
+
     if (!user) {
       navigate('/login');
       return;
     }
+    
     if (user.role !== 'admin') {
-      navigate('/account'); // Kick non-admins back to their regular account page
+      alert(`Access denied. Your current role is: "${user.role}". You must be an "admin" in MongoDB.`);
+      navigate('/account');
       return;
     }
 
     fetchAdminData();
-  }, [user, navigate]);
+  }, [user, isCheckingAuth, navigate]);
 
   const fetchAdminData = async () => {
     try {
@@ -41,7 +56,6 @@ const AdminDashboard = () => {
   const handleCreateProduct = async () => {
     try {
       const { data } = await api.post('/products');
-      // Add new blank sample product to state
       setProducts([data.data, ...products]);
       alert('Blank sample product created! You can now edit its details.');
     } catch (err) {
@@ -58,6 +72,15 @@ const AdminDashboard = () => {
       alert(err.response?.data?.message || 'Failed to delete product');
     }
   };
+
+  // Show a loading screen while waiting for the auth check
+  if (isCheckingAuth) {
+    return (
+      <div className="container" style={{ paddingTop: '5rem', textAlign: 'center' }}>
+        <h2>Verifying Admin Credentials...</h2>
+      </div>
+    );
+  }
 
   if (!user || user.role !== 'admin') return null;
 

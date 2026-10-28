@@ -5,20 +5,24 @@ export const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(true);
+  
+  // 1. Add a loading state (defaults to true)
+  const [loading, setLoading] = useState(true); 
 
   useEffect(() => {
-    const checkUserLoggedIn = async () => {
+    const verifyUser = async () => {
       try {
         const { data } = await api.get('/auth/me');
         setUser(data.data);
       } catch (error) {
         setUser(null);
       } finally {
-        setLoading(false);
+        // 2. Stop loading once the backend replies
+        setLoading(false); 
       }
     };
-    checkUserLoggedIn();
+
+    verifyUser();
   }, []);
 
   const login = async (email, password) => {
@@ -38,8 +42,17 @@ export const AuthProvider = ({ children }) => {
     setUser(null);
   };
 
+  // 3. FORCE the app to wait. Do not render any pages until we know the user's status.
+  if (loading) {
+    return (
+      <div style={{ height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <h3>Loading StyleHouse...</h3>
+      </div>
+    );
+  }
+
   return (
-    <AuthContext.Provider value={{ user, loading, login, register, logout }}>
+    <AuthContext.Provider value={{ user, login, register, logout }}>
       {children}
     </AuthContext.Provider>
   );
