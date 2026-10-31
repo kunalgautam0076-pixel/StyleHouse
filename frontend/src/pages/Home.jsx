@@ -56,6 +56,18 @@ const HeroTyping = () => {
   );
 };
 
+const BoltStrike = ({ boltRef }) => (
+  <div className="hero-bolt-strike" ref={boltRef} aria-hidden="true">
+    <div className="hero-bolt-cursor-glow" />
+    <svg viewBox="0 0 1440 900" preserveAspectRatio="none">
+      <path className="hero-bolt-path hero-bolt-path-left" pathLength="1" d="M340 -30 L290 115 L342 138 L250 302 L312 326 L205 512" />
+      <path className="hero-bolt-branch hero-bolt-branch-left" d="M292 115 L205 167 M250 302 L174 344" />
+      <path className="hero-bolt-path hero-bolt-path-right" pathLength="1" d="M1110 -40 L1040 130 L1098 151 L994 318 L1058 340 L934 535" />
+      <path className="hero-bolt-branch hero-bolt-branch-right" d="M1040 130 L1150 194 M994 318 L1100 376" />
+    </svg>
+  </div>
+);
+
 /* ─── Value Props ─── */
 const VALUES = [
   { icon: Truck,     label: 'Free Shipping', desc: 'On all orders over ₹2,000' },
@@ -75,6 +87,26 @@ const Home = () => {
   const [featured, setFeatured] = useState([]);
   const [accessories, setAccessories] = useState([]);
   const [loadingFeatured, setLoadingFeatured] = useState(true);
+  const boltRef = useRef(null);
+
+  const handleHeroPointerMove = event => {
+    if (event.pointerType !== 'mouse' || !boltRef.current) return;
+    const bounds = event.currentTarget.getBoundingClientRect();
+    const x = Math.max(0, Math.min(1, (event.clientX - bounds.left) / bounds.width));
+    const y = Math.max(0, Math.min(1, (event.clientY - bounds.top) / bounds.height));
+    boltRef.current.style.setProperty('--bolt-pointer-x', `${x * 100}%`);
+    boltRef.current.style.setProperty('--bolt-pointer-y', `${y * 100}%`);
+    boltRef.current.style.setProperty('--bolt-shift-x', `${(x - 0.5) * 18}px`);
+    boltRef.current.style.setProperty('--bolt-shift-y', `${(y - 0.5) * 14}px`);
+  };
+
+  const handleHeroPointerLeave = () => {
+    if (!boltRef.current) return;
+    boltRef.current.style.setProperty('--bolt-pointer-x', '76%');
+    boltRef.current.style.setProperty('--bolt-pointer-y', '18%');
+    boltRef.current.style.setProperty('--bolt-shift-x', '0px');
+    boltRef.current.style.setProperty('--bolt-shift-y', '0px');
+  };
 
   useEffect(() => {
     api.get('/products?limit=4')
@@ -91,10 +123,12 @@ const Home = () => {
     <div className="home-wrapper">
 
       {/* ── Hero ── */}
-      <section className="hero-section">
-        {/* Decorative background shapes */}
-        <div className="hero-bg-shape hero-bg-shape-1" />
-        <div className="hero-bg-shape hero-bg-shape-2" />
+      <section
+        className="hero-section"
+        onPointerMove={handleHeroPointerMove}
+        onPointerLeave={handleHeroPointerLeave}
+      >
+        <BoltStrike boltRef={boltRef} />
 
         <div className="hero-content">
           <motion.span
