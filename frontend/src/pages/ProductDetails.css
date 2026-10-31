@@ -291,6 +291,103 @@
 .btn-wishlist:hover { border-color: #e05252; color: #e05252; background: rgba(224,82,82,0.04); }
 .btn-wishlist.active { color: #e05252; border-color: #e05252; background: rgba(224,82,82,0.06); }
 
+/* PIN code delivery lookup */
+.pd-pincode-check {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+.pd-pincode-check h2 {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 600;
+}
+.pd-pincode-check > p {
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+.pd-pincode-form {
+  display: flex;
+  align-items: stretch;
+  width: min(100%, 420px);
+  min-height: 52px;
+  margin-top: 0.35rem;
+  overflow: hidden;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  box-sizing: border-box;
+}
+.pd-pincode-form .sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+.pd-pincode-form:focus-within {
+  border-color: var(--text-primary);
+}
+.pd-pincode-form input {
+  flex: 1 1 auto;
+  width: 0;
+  min-width: 0;
+  min-height: 50px;
+  padding: 0.75rem 0.9rem;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: var(--text-primary);
+  font-family: var(--font-body);
+  font-size: 0.95rem;
+  line-height: 1.4;
+}
+.pd-pincode-form button {
+  flex: 0 0 auto;
+  min-width: 76px;
+  padding: 0 0.9rem;
+  border: 0;
+  background: transparent;
+  color: var(--text-primary);
+  font-family: var(--font-body);
+  font-size: 0.9rem;
+  font-weight: 600;
+  white-space: nowrap;
+  cursor: pointer;
+}
+.pd-pincode-form button:disabled {
+  color: var(--text-muted);
+  cursor: not-allowed;
+}
+.pd-pincode-check .pd-pincode-status {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.4rem;
+  font-size: 0.85rem;
+}
+.pd-pincode-status.success { color: var(--success-color); }
+.pd-pincode-status.error { color: var(--error-color); }
+
+@media (max-width: 480px) {
+  .pd-pincode-form {
+    width: 100%;
+  }
+
+  .pd-pincode-form input {
+    padding-inline: 0.75rem;
+  }
+
+  .pd-pincode-form button {
+    min-width: 68px;
+    padding-inline: 0.7rem;
+  }
+}
+
 /* Trust Promises */
 .pd-promises {
   display: flex;

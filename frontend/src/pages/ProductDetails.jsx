@@ -1,11 +1,12 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Heart, ShoppingBag, Truck, Shield, RefreshCw, ChevronRight, Minus, Plus, Check } from 'lucide-react';
+import { Heart, ShoppingBag, Truck, Shield, RefreshCw, ChevronRight, Minus, Plus, Check, MapPin } from 'lucide-react';
 import api from '../services/api';
 import { CartContext } from '../context/CartContext';
 import { WishlistContext } from '../context/WishlistContext';
 import { formatCurrency } from '../utils/currency';
+import { lookupIndianPincode } from '../utils/pincode';
 import './ProductDetails.css';
 
 const ProductDetails = () => {
@@ -21,6 +22,9 @@ const ProductDetails = () => {
   const [activeImg,    setActiveImg]    = useState(0);
   const [added,        setAdded]        = useState(false);
   const [activeTab,    setActiveTab]    = useState('description');
+  const [pincode,      setPincode]      = useState('');
+  const [pincodeStatus, setPincodeStatus] = useState('');
+  const [pincodeBusy, setPincodeBusy] = useState(false);
 
   useEffect(() => {
     const fetchProduct = async () => {
@@ -45,6 +49,20 @@ const ProductDetails = () => {
     addToCart(product, selectedSize, quantity);
     setAdded(true);
     setTimeout(() => setAdded(false), 2000);
+  };
+
+  const handlePincodeCheck = async event => {
+    event.preventDefault();
+    setPincodeBusy(true);
+    setPincodeStatus('');
+    try {
+      const location = await lookupIndianPincode(pincode);
+      setPincodeStatus(`PIN code found: ${location.area}, ${location.city}, ${location.state}.`);
+    } catch (lookupError) {
+      setPincodeStatus(lookupError.message || 'Unable to check this PIN code right now.');
+    } finally {
+      setPincodeBusy(false);
+    }
   };
 
   if (loading) return (
@@ -214,6 +232,42 @@ const ProductDetails = () => {
               <Heart size={20} strokeWidth={1.5} fill={isFavorited ? 'currentColor' : 'none'} />
             </motion.button>
           </div>
+
+          <section className="pd-pincode-check" aria-labelledby="pd-pincode-title">
+            <h2 id="pd-pincode-title">Check delivery area</h2>
+            <p>Enter your PIN code to find its city and state.</p>
+            <form className="pd-pincode-form" onSubmit={handlePincodeCheck}>
+              <label className="sr-only" htmlFor="pd-pincode">6-digit PIN code</label>
+              <input
+                id="pd-pincode"
+                type="text"
+                inputMode="numeric"
+                autoComplete="postal-code"
+                placeholder="Pincode"
+                value={pincode}
+                maxLength={6}
+                pattern="[1-9][0-9]{5}"
+                onChange={event => {
+                  setPincode(event.target.value.replace(/\D/g, '').slice(0, 6));
+                  setPincodeStatus('');
+                }}
+                aria-describedby={pincodeStatus ? 'pd-pincode-status' : undefined}
+              />
+              <button type="submit" disabled={pincodeBusy || pincode.length !== 6}>
+                {pincodeBusy ? 'Checking…' : 'Check'}
+              </button>
+            </form>
+            {pincodeStatus && (
+              <p
+                className={`pd-pincode-status${pincodeStatus.startsWith('PIN code found') ? ' success' : ' error'}`}
+                id="pd-pincode-status"
+                role="status"
+              >
+                {pincodeStatus.startsWith('PIN code found') && <MapPin size={15} aria-hidden="true" />}
+                {pincodeStatus}
+              </p>
+            )}
+          </section>
 
           {/* Value Props */}
           <div className="pd-promises">

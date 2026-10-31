@@ -11,12 +11,16 @@ const createRequestError = (message, statusCode = 400) => {
 };
 
 const prepareOrder = async ({ cartItems, shippingAddress }) => {
-  const addressFields = ['fullName', 'address', 'city', 'postalCode', 'country', 'phone'];
+  const addressFields = ['fullName', 'address', 'city', 'state', 'postalCode', 'country', 'phone'];
   if (
     !shippingAddress
     || addressFields.some(field => typeof shippingAddress[field] !== 'string' || !shippingAddress[field].trim())
   ) {
     throw createRequestError('Please provide all required shipping information.');
+  }
+
+  if (!/^[1-9]\d{5}$/.test(shippingAddress.postalCode.trim())) {
+    throw createRequestError('Please provide a valid 6-digit Indian PIN code.');
   }
 
   if (!Array.isArray(cartItems) || cartItems.length === 0 || cartItems.length > 50) {

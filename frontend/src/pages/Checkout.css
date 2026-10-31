@@ -41,7 +41,13 @@
 .checkout-form { display: flex; flex-direction: column; gap: 1.25rem; }
 
 .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+.form-row--address { grid-template-columns: repeat(3, minmax(0, 1fr)); }
 .form-group.half { /* inherits form-group base */ }
+.checkout-pincode-status {
+  margin: -0.75rem 0 0;
+  color: var(--text-secondary);
+  font-size: 0.82rem;
+}
 
 /* Payment Methods */
 .payment-methods {

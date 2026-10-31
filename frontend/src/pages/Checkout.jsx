@@ -5,6 +5,7 @@ import { CartContext } from '../context/CartContext';
 import { AuthContext } from '../context/AuthContext';
 import api from '../services/api';
 import { formatCurrency } from '../utils/currency';
+import { lookupIndianPincode } from '../utils/pincode';
 import './Checkout.css';
 
 const loadRazorpayScript = () => new Promise((resolve) => {
@@ -28,11 +29,15 @@ const Checkout = () => {
   const { cartItems, getCartTotal, clearCart } = useContext(CartContext);
   const { user } = useContext(AuthContext);
   const navigate = useNavigate();
-  const { register, handleSubmit, formState: { errors } } = useForm();
+  const { register, handleSubmit, setValue, formState: { errors } } = useForm({
+    defaultValues: { country: 'India' },
+  });
   
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState('');
   const [paymentMethod, setPaymentMethod] = useState('Razorpay');
+  const [pincodeStatus, setPincodeStatus] = useState('');
+  const [postalCode, setPostalCode] = useState('');
 
   // Redirect if cart is empty or user is not logged in
   useEffect(() => {
@@ -42,6 +47,33 @@ const Checkout = () => {
       navigate('/cart');
     }
   }, [user, cartItems, navigate]);
+
+  useEffect(() => {
+    if (!/^[1-9]\d{5}$/.test(postalCode)) {
+      return undefined;
+    }
+
+    const controller = new AbortController();
+    const timeout = setTimeout(async () => {
+      setPincodeStatus('Looking up your city and state…');
+      try {
+        const location = await lookupIndianPincode(postalCode, { signal: controller.signal });
+        setValue('city', location.city, { shouldValidate: true, shouldDirty: true });
+        setValue('state', location.state, { shouldValidate: true, shouldDirty: true });
+        setValue('country', location.country, { shouldValidate: true, shouldDirty: true });
+        setPincodeStatus(`Address found: ${location.city}, ${location.state}.`);
+      } catch (lookupError) {
+        if (lookupError.name !== 'AbortError') {
+          setPincodeStatus(lookupError.message || 'Unable to look up this PIN code.');
+        }
+      }
+    }, 350);
+
+    return () => {
+      clearTimeout(timeout);
+      controller.abort();
+    };
+  }, [postalCode, setValue]);
 
   const itemsPrice = getCartTotal();
   const shippingPrice = itemsPrice > 2000 ? 0 : 150;
@@ -155,7 +187,7 @@ const Checkout = () => {
               {errors.address && <span className="error-text">{errors.address.message}</span>}
             </div>
 
-            <div className="form-row">
+            <div className="form-row form-row--address">
               <div className="form-group half">
                 <label>City</label>
                 <input 
@@ -167,15 +199,39 @@ const Checkout = () => {
               </div>
 
               <div className="form-group half">
-                <label>Postal Code</label>
+                <label>State</label>
+                <input
+                  type="text"
+                  {...register('state', { required: 'State is required' })}
+                  className={errors.state ? 'input-error' : ''}
+                />
+                {errors.state && <span className="error-text">{errors.state.message}</span>}
+              </div>
+
+              <div className="form-group half">
+                <label>PIN Code</label>
                 <input 
                   type="text" 
-                  {...register('postalCode', { required: 'Postal Code is required' })} 
+                  inputMode="numeric"
+                  autoComplete="postal-code"
+                  maxLength={6}
+                  {...register('postalCode', {
+                    required: 'PIN code is required',
+                    pattern: { value: /^[1-9]\d{5}$/, message: 'Enter a valid 6-digit Indian PIN code' },
+                    onChange: event => {
+                      event.target.value = event.target.value.replace(/\D/g, '').slice(0, 6);
+                      setPostalCode(event.target.value);
+                      setPincodeStatus('');
+                    },
+                  })}
                   className={errors.postalCode ? 'input-error' : ''}
                 />
                 {errors.postalCode && <span className="error-text">{errors.postalCode.message}</span>}
               </div>
             </div>
+            {pincodeStatus && (
+              <p className="checkout-pincode-status" role="status">{pincodeStatus}</p>
+            )}
 
             <div className="form-row">
               <div className="form-group half">

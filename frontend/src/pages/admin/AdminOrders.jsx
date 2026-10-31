@@ -24,7 +24,7 @@ const AdminOrders = () => {
                   <tr key={order._id}>
                     <td><strong>#{order._id.slice(-6).toUpperCase()}</strong><span className="admin-order-date">{new Date(order.createdAt).toLocaleDateString('en-IN')}</span></td>
                     <td><strong>{order.user?.name || 'Customer'}</strong><span className="admin-order-date">{order.user?.email || 'Account unavailable'}</span></td>
-                    <td><strong>{order.shippingAddress.fullName}</strong><span className="admin-order-date">{order.shippingAddress.city}, {order.shippingAddress.postalCode}</span><span className="admin-order-date">{order.shippingAddress.phone}</span></td>
+                    <td><strong>{order.shippingAddress.fullName}</strong><span className="admin-order-date">{order.shippingAddress.city}{order.shippingAddress.state ? `, ${order.shippingAddress.state}` : ''} · {order.shippingAddress.postalCode}</span><span className="admin-order-date">{order.shippingAddress.phone}</span></td>
                     <td>
                       <div className="admin-order-items">
                         {order.orderItems.map((item, index) => (
