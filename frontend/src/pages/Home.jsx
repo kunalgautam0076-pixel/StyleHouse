@@ -5,6 +5,7 @@ import { useRef } from 'react';
 import { ArrowRight, ChevronDown, Star, Shield, RefreshCw, Truck } from 'lucide-react';
 import api from '../services/api';
 import ProductCard from '../components/products/ProductCard';
+import FashionScrollShowcase from '../components/home/FashionScrollShowcase';
 import './Home.css';
 
 /* ─── Reusable Reveal Wrapper ─── */
@@ -122,69 +123,73 @@ const Home = () => {
   return (
     <div className="home-wrapper">
 
-      {/* ── Hero ── */}
-      <section
-        className="hero-section"
-        onPointerMove={handleHeroPointerMove}
-        onPointerLeave={handleHeroPointerLeave}
-      >
-        <BoltStrike boltRef={boltRef} />
+      {/* Opening Home section: green, scroll-driven 3D fashion showcase. */}
+      <FashionScrollShowcase />
 
-        <div className="hero-content">
-          <motion.span
-            className="hero-eyebrow"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.1, duration: 0.6 }}
-          >
-            New Collection — Fall / Winter 2026
-          </motion.span>
-
-          <motion.h1
-            className="hero-title"
-            initial={{ opacity: 0, y: 40 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.25, duration: 0.75, ease: [0.25, 0.46, 0.45, 0.94] }}
-          >
-            Effortless <HeroTyping />
-          </motion.h1>
-
-          <motion.p
-            className="hero-subtitle"
-            initial={{ opacity: 0, y: 25 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.4, duration: 0.65 }}
-          >
-            Discover minimalist lines and premium materials crafted for the modern wardrobe.
-          </motion.p>
-
-          <motion.div
-            className="hero-cta-group"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.55, duration: 0.6 }}
-          >
-            <Link to="/shop" className="btn-primary hero-cta-primary">
-              <span>Shop Collection</span>
-              <ArrowRight size={16} />
-            </Link>
-            <Link to="/shop?category=new-arrivals" className="btn-secondary hero-cta-secondary">
-              New Arrivals
-            </Link>
-          </motion.div>
-        </div>
-
-        {/* Scroll hint */}
-        <motion.a
-          href="#categories"
-          className="hero-scroll-hint"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 1.2 }}
+      {/* Beige hero retained in source, but replaced by the green 3D opening. */}
+      {false && (
+        <section
+          className="hero-section"
+          onPointerMove={handleHeroPointerMove}
+          onPointerLeave={handleHeroPointerLeave}
         >
-          <ChevronDown size={22} strokeWidth={1.5} />
-        </motion.a>
-      </section>
+          <BoltStrike boltRef={boltRef} />
+
+          <div className="hero-content">
+            <motion.span
+              className="hero-eyebrow"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.1, duration: 0.6 }}
+            >
+              New Collection — Fall / Winter 2026
+            </motion.span>
+
+            <motion.h1
+              className="hero-title"
+              initial={{ opacity: 0, y: 40 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.25, duration: 0.75, ease: [0.25, 0.46, 0.45, 0.94] }}
+            >
+              Effortless <HeroTyping />
+            </motion.h1>
+
+            <motion.p
+              className="hero-subtitle"
+              initial={{ opacity: 0, y: 25 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.4, duration: 0.65 }}
+            >
+              Discover minimalist lines and premium materials crafted for the modern wardrobe.
+            </motion.p>
+
+            <motion.div
+              className="hero-cta-group"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.55, duration: 0.6 }}
+            >
+              <Link to="/shop" className="btn-primary hero-cta-primary">
+                <span>Shop Collection</span>
+                <ArrowRight size={16} />
+              </Link>
+              <Link to="/shop?category=new-arrivals" className="btn-secondary hero-cta-secondary">
+                New Arrivals
+              </Link>
+            </motion.div>
+          </div>
+
+          <motion.a
+            href="#categories"
+            className="hero-scroll-hint"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 1.2 }}
+          >
+            <ChevronDown size={22} strokeWidth={1.5} />
+          </motion.a>
+        </section>
+      )}
 
       {/* ── Value Props Bar ── */}
       <section className="values-bar">
@@ -232,8 +237,10 @@ const Home = () => {
         </div>
       </section>
 
+      {/* <FashionScrollShowcase /> moved to the opening Home section. */}
+
       {/* ── Featured Products ── */}
-      <section className="container featured-section">
+      <section id="featured-products" className="container featured-section">
         <Reveal>
           <div className="section-header-block">
             <span className="section-eyebrow">Curated picks</span>

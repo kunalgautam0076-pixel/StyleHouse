@@ -1,0 +1,192 @@
+.fashion-scroll-section {
+  position: relative;
+  height: 165svh;
+  background: #102b25;
+}
+
+.fashion-scroll-stage {
+  position: sticky;
+  top: 0;
+  height: 100svh;
+  min-height: 640px;
+  overflow: hidden;
+  isolation: isolate;
+  background:
+    radial-gradient(ellipse at 72% 54%, rgba(201,169,110,0.16), transparent 35%),
+    radial-gradient(ellipse at 14% 12%, rgba(89,126,104,0.28), transparent 42%),
+    linear-gradient(125deg, #102b25 0%, #1d4037 56%, #162f29 100%);
+}
+
+.fashion-scroll-stage::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  opacity: 0.14;
+  pointer-events: none;
+  background-image: repeating-linear-gradient(115deg, transparent 0 42px, rgba(255,255,255,0.05) 43px, transparent 44px 86px);
+}
+
+.fashion-scroll-copy {
+  position: absolute;
+  z-index: 4;
+  top: clamp(64px, 10vh, 104px);
+  left: clamp(24px, 8vw, 128px);
+  width: min(390px, 36vw);
+  color: #f8f4ec;
+}
+
+.fashion-scroll-kicker {
+  display: block;
+  margin-bottom: 1.15rem;
+  color: #d3b77f;
+  font-size: 0.72rem;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.fashion-scroll-copy h2 {
+  color: #f8f4ec;
+  font-family: var(--font-heading);
+  font-size: clamp(3rem, 5.3vw, 5.2rem);
+  font-weight: 500;
+  line-height: 0.98;
+}
+
+.fashion-scroll-copy h2 em {
+  color: #d3b77f;
+  font-weight: 400;
+}
+
+.fashion-scroll-copy p {
+  max-width: 290px;
+  margin-top: 1.35rem;
+  color: rgba(248,244,236,0.72);
+  font-size: 0.94rem;
+  line-height: 1.7;
+}
+
+.fashion-scroll-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.7rem;
+  margin-top: 1.55rem;
+  padding-bottom: 0.45rem;
+  border-bottom: 1px solid rgba(211,183,127,0.72);
+  color: #f8f4ec;
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  transition: color 180ms ease, gap 180ms ease;
+}
+
+.fashion-scroll-link:hover {
+  gap: 1rem;
+  color: #d3b77f;
+}
+
+.fashion-scroll-canvas,
+.fashion-scroll-fallback {
+  position: absolute !important;
+  z-index: 2;
+  inset: 0;
+  width: 100% !important;
+  height: 100% !important;
+  pointer-events: none;
+}
+
+.fashion-scroll-fallback {
+  z-index: 1;
+  transition: opacity 350ms ease;
+}
+
+.fashion-scroll-fallback.is-hidden {
+  opacity: 0;
+}
+
+.fashion-fallback-card {
+  position: absolute;
+  top: 58%;
+  width: clamp(170px, 18vw, 250px);
+  aspect-ratio: 0.73;
+  object-fit: cover;
+  border: 5px solid rgba(201,169,110,0.82);
+  background: #d5d0c7;
+  box-shadow: 0 24px 70px rgba(0,0,0,0.3);
+  transform: translateY(-50%);
+}
+
+.fashion-fallback-card-1 {
+  left: calc(50% - 390px);
+  rotate: -8deg;
+}
+
+.fashion-fallback-card-2 {
+  left: calc(50% - 125px);
+  z-index: 1;
+  rotate: 2deg;
+}
+
+.fashion-fallback-card-3 {
+  left: calc(50% + 140px);
+  rotate: 8deg;
+}
+
+.fashion-scroll-index {
+  position: absolute;
+  z-index: 4;
+  right: clamp(24px, 6vw, 88px);
+  bottom: 3rem;
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  color: rgba(248,244,236,0.62);
+  font-size: 0.68rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.fashion-scroll-index i {
+  width: 44px;
+  height: 1px;
+  background: rgba(211,183,127,0.72);
+}
+
+@media (max-width: 1100px) {
+  .fashion-scroll-copy {
+    left: 6vw;
+    width: 32vw;
+  }
+}
+
+@media (max-width: 680px) {
+  .fashion-scroll-section { height: 145svh; }
+  .fashion-scroll-stage { min-height: 620px; }
+  .fashion-scroll-copy {
+    top: max(72px, 10vh);
+    left: 24px;
+    right: 24px;
+    width: auto;
+  }
+  .fashion-scroll-kicker { margin-bottom: 0.8rem; }
+  .fashion-scroll-copy h2 { font-size: clamp(2.8rem, 13vw, 4.2rem); }
+  .fashion-scroll-copy p {
+    max-width: 280px;
+    margin-top: 0.8rem;
+    font-size: 0.84rem;
+  }
+  .fashion-scroll-link { margin-top: 1rem; }
+  .fashion-fallback-card {
+    top: 69%;
+    width: clamp(145px, 43vw, 190px);
+    border-width: 4px;
+  }
+  .fashion-fallback-card-1 { left: calc(50% - 112px); }
+  .fashion-fallback-card-2 { left: calc(50% - 75px); }
+  .fashion-fallback-card-3 { left: calc(50% - 38px); }
+  .fashion-scroll-index { right: 24px; bottom: 1.5rem; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fashion-scroll-link,
+  .fashion-scroll-fallback { transition: none; }
+}
