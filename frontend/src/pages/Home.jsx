@@ -318,8 +318,8 @@ const Home = () => {
               designed with uncompromising attention to detail, using sustainably sourced fabrics
               that stand the test of time.
             </p>
-            <Link to="/about" className="btn-secondary" style={{ marginTop: '2rem' }}>
-              Read Our Story
+            <Link to="/shop" className="btn-secondary" style={{ marginTop: '2rem' }}>
+              Explore Collection
             </Link>
           </Reveal>
 

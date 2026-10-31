@@ -1,13 +1,23 @@
 import React, { useContext, useState } from 'react';
 import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Eye, EyeOff, UserPlus, AlertCircle } from 'lucide-react';
 import { AuthContext } from '../context/AuthContext';
 import './Login.css'; /* Shares auth page styles */
 
+const registerSchema = z.object({
+  name: z.string().min(2, 'Name must be at least 2 characters').max(50, 'Name must be less than 50 characters'),
+  email: z.string().email('Please enter a valid email address'),
+  password: z.string().min(8, 'Password must be at least 8 characters'),
+});
+
 const Register = () => {
-  const { register: hookRegister, handleSubmit, formState: { errors }, watch } = useForm();
+  const { register: hookRegister, handleSubmit, formState: { errors } } = useForm({
+    resolver: zodResolver(registerSchema),
+  });
   const { register: registerUser } = useContext(AuthContext);
   const navigate = useNavigate();
   const [serverError, setServerError] = useState('');
@@ -68,7 +78,7 @@ const Register = () => {
               <input
                 type="text"
                 id="name"
-                {...hookRegister('name', { required: 'Name is required' })}
+                {...hookRegister('name')}
                 className={errors.name ? 'input-error' : ''}
                 placeholder="Your full name"
                 autoComplete="name"
@@ -81,7 +91,7 @@ const Register = () => {
               <input
                 type="email"
                 id="email"
-                {...hookRegister('email', { required: 'Email is required' })}
+                {...hookRegister('email')}
                 className={errors.email ? 'input-error' : ''}
                 placeholder="you@example.com"
                 autoComplete="email"
@@ -95,10 +105,7 @@ const Register = () => {
                 <input
                   type={showPass ? 'text' : 'password'}
                   id="password"
-                  {...hookRegister('password', {
-                    required: 'Password is required',
-                    minLength: { value: 8, message: 'Must be at least 8 characters' },
-                  })}
+                  {...hookRegister('password')}
                   className={errors.password ? 'input-error' : ''}
                   placeholder="At least 8 characters"
                   autoComplete="new-password"

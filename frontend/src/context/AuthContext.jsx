@@ -42,17 +42,8 @@ export const AuthProvider = ({ children }) => {
     setUser(null);
   };
 
-  // 3. FORCE the app to wait. Do not render any pages until we know the user's status.
-  if (loading) {
-    return (
-      <div style={{ height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-        <h3>Loading StyleHouse...</h3>
-      </div>
-    );
-  }
-
   return (
-    <AuthContext.Provider value={{ user, login, register, logout }}>
+    <AuthContext.Provider value={{ user, loading, login, register, logout }}>
       {children}
     </AuthContext.Provider>
   );

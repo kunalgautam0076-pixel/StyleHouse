@@ -46,9 +46,7 @@ export default function FashionScrollShowcase() {
           </Suspense>
         )}
 
-        <div className="fashion-scroll-index" aria-hidden="true">
-          <span>01</span><i /><span>03</span>
-        </div>
+        <div className="fashion-scroll-index" aria-hidden="true" />
       </div>
     </section>
   );

@@ -7,5 +7,15 @@ const api = axios.create({
     'Content-Type': 'application/json',
   },
 });
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response?.status === 401) {
+      // Clear any stale auth state - redirect will be handled by components
+      console.warn('Unauthorized request - session may have expired');
+    }
+    return Promise.reject(error);
+  }
+);
 
 export default api;

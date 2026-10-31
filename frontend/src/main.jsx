@@ -1,5 +1,6 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
+import { HelmetProvider } from 'react-helmet-async';
 import App from './App.jsx';
 import './index.css';
 import './styles/global.css';
@@ -9,12 +10,14 @@ import { WishlistProvider } from './context/WishlistContext.jsx';
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
-    <AuthProvider>
-      <CartProvider>
-        <WishlistProvider> {/* <-- ADD THIS */}
-          <App />
-        </WishlistProvider>
-      </CartProvider>
-    </AuthProvider>
+    <HelmetProvider>
+      <AuthProvider>
+        <CartProvider>
+          <WishlistProvider>
+            <App />
+          </WishlistProvider>
+        </CartProvider>
+      </AuthProvider>
+    </HelmetProvider>
   </React.StrictMode>,
 );

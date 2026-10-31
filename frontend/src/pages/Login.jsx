@@ -1,13 +1,22 @@
 import React, { useState, useContext, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Eye, EyeOff, LogIn, AlertCircle } from 'lucide-react';
 import { AuthContext } from '../context/AuthContext';
 import './Login.css';
 
+const loginSchema = z.object({
+  email: z.string().email('Please enter a valid email address'),
+  password: z.string().min(1, 'Password is required'),
+});
+
 const Login = () => {
-  const { register, handleSubmit, formState: { errors } } = useForm();
+  const { register, handleSubmit, formState: { errors } } = useForm({
+    resolver: zodResolver(loginSchema),
+  });
   const { login, user } = useContext(AuthContext);
   const navigate = useNavigate();
   const [serverError, setServerError] = useState('');
@@ -72,7 +81,7 @@ const Login = () => {
               <input
                 type="email"
                 id="email"
-                {...register('email', { required: 'Email is required' })}
+                {...register('email')}
                 className={errors.email ? 'input-error' : ''}
                 placeholder="you@example.com"
                 autoComplete="email"
@@ -86,7 +95,7 @@ const Login = () => {
                 <input
                   type={showPass ? 'text' : 'password'}
                   id="password"
-                  {...register('password', { required: 'Password is required' })}
+                  {...register('password')}
                   className={errors.password ? 'input-error' : ''}
                   placeholder="Enter your password"
                   autoComplete="current-password"

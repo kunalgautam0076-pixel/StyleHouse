@@ -3,6 +3,8 @@ import cors from 'cors';
 import helmet from 'helmet';
 import cookieParser from 'cookie-parser';
 import rateLimit from 'express-rate-limit';
+import mongoSanitize from 'express-mongo-sanitize';
+import hpp from 'hpp';
 
 // Route imports
 import authRoutes from './routes/authRoutes.js';
@@ -29,6 +31,12 @@ app.use('/api', limiter);
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
+
+// Sanitize data - prevent NoSQL injection
+app.use(mongoSanitize());
+
+// Prevent HTTP parameter pollution
+app.use(hpp());
 
 // Health Check
 app.get('/api/v1/health', (req, res) => {

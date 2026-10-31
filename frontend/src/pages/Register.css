@@ -1,2 +1,2 @@
-/* Register page uses the shared auth styles from Login.css */
-/* This file is kept for build compatibility */
+/* Register page shares auth styles defined in Login.css */
+/* This file exists for module co-location consistency */

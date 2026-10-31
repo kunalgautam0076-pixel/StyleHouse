@@ -11,16 +11,16 @@ const SHOP_LINKS   = [
   { label: 'All Products', to: '/shop' },
 ];
 const SUPPORT_LINKS = [
-  { label: 'Contact Us',        to: '/contact' },
-  { label: 'Shipping & Returns', to: '/shipping' },
-  { label: 'FAQ',               to: '/faq' },
-  { label: 'Size Guide',        to: '/size-guide' },
+  { label: 'Contact Us',         href: '#' },
+  { label: 'Shipping & Returns', href: '#' },
+  { label: 'FAQ',                href: '#' },
+  { label: 'Size Guide',         href: '#' },
 ];
 const COMPANY_LINKS = [
-  { label: 'Our Story',     to: '/about' },
-  { label: 'Sustainability', to: '/sustainability' },
-  { label: 'Careers',       to: '/careers' },
-  { label: 'Press',         to: '/press' },
+  { label: 'Our Story',      href: '#' },
+  { label: 'Sustainability', href: '#' },
+  { label: 'Careers',        href: '#' },
+  { label: 'Press',          href: '#' },
 ];
 const SOCIALS = [
   { icon: Heart,         label: 'Pinterest',  href: '#' },
@@ -67,11 +67,15 @@ const Footer = () => (
         <div className="footer-section">
           <h4 className="footer-heading">Support</h4>
           <ul className="footer-links">
-            {SUPPORT_LINKS.map(({ label, to }) => (
-              <li key={to}>
-                <Link to={to} className="footer-link">
+            {SUPPORT_LINKS.map(({ label, href }) => (
+              <li key={label}>
+                <a
+                  href={href}
+                  onClick={(e) => e.preventDefault()}
+                  className="footer-link"
+                >
                   <ArrowRight size={12} /> {label}
-                </Link>
+                </a>
               </li>
             ))}
           </ul>
@@ -81,11 +85,15 @@ const Footer = () => (
         <div className="footer-section">
           <h4 className="footer-heading">Company</h4>
           <ul className="footer-links">
-            {COMPANY_LINKS.map(({ label, to }) => (
-              <li key={to}>
-                <Link to={to} className="footer-link">
+            {COMPANY_LINKS.map(({ label, href }) => (
+              <li key={label}>
+                <a
+                  href={href}
+                  onClick={(e) => e.preventDefault()}
+                  className="footer-link"
+                >
                   <ArrowRight size={12} /> {label}
-                </Link>
+                </a>
               </li>
             ))}
           </ul>
@@ -97,8 +105,8 @@ const Footer = () => (
       <div className="container footer-bottom-inner">
         <p>&copy; {new Date().getFullYear()} StyleHouse. All rights reserved.</p>
         <div className="footer-legal">
-          <Link to="/privacy">Privacy Policy</Link>
-          <Link to="/terms">Terms of Service</Link>
+          <a href="#" onClick={(e) => e.preventDefault()}>Privacy Policy</a>
+          <a href="#" onClick={(e) => e.preventDefault()}>Terms of Service</a>
         </div>
         <div className="footer-payment-icons">
           <span className="payment-badge">Visa</span>

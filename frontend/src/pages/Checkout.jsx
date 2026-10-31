@@ -44,7 +44,7 @@ const Checkout = () => {
   }, [user, cartItems, navigate]);
 
   const itemsPrice = getCartTotal();
-  const shippingPrice = itemsPrice > 200 ? 0 : 15;
+  const shippingPrice = itemsPrice > 2000 ? 0 : 150;
   const totalPrice = itemsPrice + shippingPrice;
 
   const onSubmit = async (data) => {

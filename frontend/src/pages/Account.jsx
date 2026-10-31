@@ -89,7 +89,7 @@ const Account = () => {
         >
           <div className="profile-card">
             <div className="profile-avatar">
-              {user.name.charAt(0).toUpperCase()}
+              {(user.name || 'U').charAt(0).toUpperCase()}
             </div>
             <h3>{user.name}</h3>
             <p>{user.email}</p>

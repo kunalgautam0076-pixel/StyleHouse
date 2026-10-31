@@ -89,4 +89,9 @@ productSchema.index(
   }
 );
 
+productSchema.index({ category: 1, isPublished: 1 });
+productSchema.index({ price: 1 });
+productSchema.index({ isPublished: 1, createdAt: -1 });
+productSchema.index({ name: 'text', description: 'text' });
+
 export default mongoose.model('Product', productSchema);

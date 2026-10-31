@@ -137,18 +137,6 @@
   z-index: 4;
   right: clamp(24px, 6vw, 88px);
   bottom: 3rem;
-  display: flex;
-  align-items: center;
-  gap: 0.85rem;
-  color: rgba(248,244,236,0.62);
-  font-size: 0.68rem;
-  font-variant-numeric: tabular-nums;
-}
-
-.fashion-scroll-index i {
-  width: 44px;
-  height: 1px;
-  background: rgba(211,183,127,0.72);
 }
 
 @media (max-width: 1100px) {
