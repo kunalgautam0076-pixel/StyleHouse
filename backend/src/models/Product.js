@@ -4,7 +4,6 @@ const variantSchema = new mongoose.Schema({
   sku: {
     type: String,
     required: true,
-    unique: true,
   },
   size: {
     type: String,
@@ -80,6 +79,14 @@ const productSchema = new mongoose.Schema(
     },
   },
   { timestamps: true }
+);
+
+productSchema.index(
+  { 'variants.sku': 1 },
+  {
+    unique: true,
+    partialFilterExpression: { 'variants.sku': { $type: 'string' } },
+  }
 );
 
 export default mongoose.model('Product', productSchema);
