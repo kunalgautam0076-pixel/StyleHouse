@@ -86,6 +86,7 @@ const CATEGORIES = [
 
 const Home = () => {
   const [featured, setFeatured] = useState([]);
+  const [heroProducts, setHeroProducts] = useState([]);
   const [accessories, setAccessories] = useState([]);
   const [loadingFeatured, setLoadingFeatured] = useState(true);
   const boltRef = useRef(null);
@@ -110,8 +111,12 @@ const Home = () => {
   };
 
   useEffect(() => {
-    api.get('/products?limit=4')
-      .then(({ data }) => setFeatured(data.data?.slice(0, 4) || []))
+    api.get('/products?limit=8')
+      .then(({ data }) => {
+        const products = data.data || [];
+        setFeatured(products.slice(0, 4));
+        setHeroProducts(products);
+      })
       .catch(() => {})
       .finally(() => setLoadingFeatured(false));
 
@@ -124,7 +129,7 @@ const Home = () => {
     <div className="home-wrapper">
 
       {/* Opening Home section: green, scroll-driven 3D fashion showcase. */}
-      <FashionScrollShowcase />
+      <FashionScrollShowcase products={heroProducts} />
 
       {/* Beige hero retained in source, but replaced by the green 3D opening. */}
       {false && (

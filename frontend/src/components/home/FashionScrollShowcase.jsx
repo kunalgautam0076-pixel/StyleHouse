@@ -1,31 +1,27 @@
-import { Suspense, lazy, useEffect, useRef, useState } from 'react';
+import DriftWall from './DriftWall';
 import fashionLooks from './fashionLooks';
 import './FashionScrollShowcase.css';
 
-const FashionScrollScene = lazy(() => import('./FashionScrollScene'));
+export default function FashionScrollShowcase({ products = [] }) {
+  const productItems = products.flatMap(product => {
+    const image = product.images?.find(item => item.isPrimary)?.url || product.images?.[0]?.url;
+    if (!image || !product.slug) return [];
 
-export default function FashionScrollShowcase() {
-  const sectionRef = useRef(null);
-  const [isNearViewport, setIsNearViewport] = useState(false);
-  const [texturesReady, setTexturesReady] = useState(false);
-
-  useEffect(() => {
-    const section = sectionRef.current;
-    if (!section) return undefined;
-    if (!('IntersectionObserver' in window)) {
-      setIsNearViewport(true);
-      return undefined;
-    }
-
-    const observer = new IntersectionObserver(([entry]) => {
-      setIsNearViewport(entry.isIntersecting);
-    }, { rootMargin: '100px 0px' });
-    observer.observe(section);
-    return () => observer.disconnect();
-  }, []);
+    return [{
+      image,
+      title: product.name,
+      href: `/product/${product.slug}`,
+    }];
+  });
+  const items = productItems.length > 0
+    ? productItems
+    : fashionLooks.map(look => ({
+      image: look.image,
+      title: look.label,
+    }));
 
   return (
-    <section id="fashion-showcase" className="fashion-scroll-section" ref={sectionRef} aria-labelledby="fashion-scroll-title">
+    <section id="fashion-showcase" className="fashion-scroll-section" aria-labelledby="fashion-scroll-title">
       <div className="fashion-scroll-stage">
         <div className="fashion-scroll-copy">
           <span className="fashion-scroll-kicker">StyleHouse / New season</span>
@@ -34,19 +30,29 @@ export default function FashionScrollShowcase() {
           <a className="fashion-scroll-link" href="#categories">Explore the collection <span aria-hidden="true">↗</span></a>
         </div>
 
-        <div className={`fashion-scroll-fallback${texturesReady ? ' is-hidden' : ''}`} aria-hidden="true">
-          {fashionLooks.map((look, index) => (
-            <img key={look.label} src={look.image} alt="" className={`fashion-fallback-card fashion-fallback-card-${index + 1}`} />
-          ))}
-        </div>
-
-        {isNearViewport && (
-          <Suspense fallback={null}>
-            <FashionScrollScene sectionRef={sectionRef} onReady={setTexturesReady} />
-          </Suspense>
-        )}
-
-        <div className="fashion-scroll-index" aria-hidden="true" />
+        <DriftWall
+          items={items}
+          columns={7}
+          tileWidth={200}
+          tileHeight={260}
+          gap={18}
+          tilt={16}
+          turn={-14}
+          perspective={1200}
+          depth={120}
+          speed={42}
+          direction="up"
+          variance={0.45}
+          parallax={0.6}
+          lift={64}
+          fade={0.6}
+          dim={0.25}
+          overlayColor="#102b25"
+          radius={14}
+          roll={0}
+          pauseOnHover={false}
+          grayscale={false}
+        />
       </div>
     </section>
   );
