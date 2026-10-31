@@ -93,6 +93,11 @@
 .admin-error { margin: 0 0 14px; padding: 10px 12px; border: 1px solid #f0d7d4; border-radius: 6px; background: #fff8f7; color: #a94842; font-size: 0.77rem; }
 .admin-status { padding: 24px 12px; color: #737b76; font-size: 0.82rem; }
 .admin-section { margin: 0 0 30px; scroll-margin-top: 82px; }
+.admin-route-view { animation: admin-route-enter 180ms ease both; }
+@keyframes admin-route-enter {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
 .admin-section-heading { margin-bottom: 15px; }
 .admin-section-heading h2,
 .inventory-heading h1 { display: flex; align-items: center; gap: 8px; margin: 0; color: var(--admin-ink); font-family: var(--font-heading); font-size: 1.28rem; font-weight: 500; }
@@ -122,4 +127,5 @@
 }
 @media (prefers-reduced-motion: reduce) {
   .admin-add-button { transition: none; }
+  .admin-route-view { animation: none; }
 }

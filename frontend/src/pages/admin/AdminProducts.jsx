@@ -1,6 +1,7 @@
-import { ChevronDown, MoreHorizontal, Plus } from 'lucide-react';
+import { MoreHorizontal, Plus } from 'lucide-react';
 import { useNavigate, useOutletContext } from 'react-router-dom';
 import { formatCurrency } from '../../utils/currency';
+import AdminSelect from './AdminSelect';
 import './AdminProducts.css';
 import './AdminTables.css';
 
@@ -38,7 +39,7 @@ const AdminProducts = () => {
   };
 
   return (
-    <>
+    <div className="admin-route-view">
       {showAddProduct && (
         <section className="admin-section add-product-section" aria-labelledby="add-product-title">
           <div className="admin-section-heading">
@@ -81,7 +82,22 @@ const AdminProducts = () => {
                 </button>
               ))}
             </div>
-            <label className="admin-sort-select"><span>Sort</span><select value={sortBy} onChange={event => { setSortBy(event.target.value); setProductPage(1); }} aria-label="Sort products"><option value="newest">Newest</option><option value="oldest">Oldest</option><option value="price-low">Price: low to high</option><option value="price-high">Price: high to low</option><option value="name">Name</option></select><ChevronDown size={14} aria-hidden="true" /></label>
+            <div className="admin-sort-select">
+              <span>Sort</span>
+              <AdminSelect
+                ariaLabel="Sort products"
+                value={sortBy}
+                triggerClassName="admin-sort-trigger"
+                options={[
+                  { value: 'newest', label: 'Newest' },
+                  { value: 'oldest', label: 'Oldest' },
+                  { value: 'price-low', label: 'Price: low to high' },
+                  { value: 'price-high', label: 'Price: high to low' },
+                  { value: 'name', label: 'Name' },
+                ]}
+                onChange={value => { setSortBy(value); setProductPage(1); }}
+              />
+            </div>
           </div>
         </div>
 
@@ -127,7 +143,7 @@ const AdminProducts = () => {
           </div>
         )}
       </section>
-    </>
+    </div>
   );
 };
 

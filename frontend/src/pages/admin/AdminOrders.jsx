@@ -1,5 +1,6 @@
 import { useOutletContext } from 'react-router-dom';
 import { formatCurrency } from '../../utils/currency';
+import AdminSelect from './AdminSelect';
 import './AdminOrders.css';
 import './AdminTables.css';
 
@@ -7,7 +8,7 @@ const AdminOrders = () => {
   const { orders, loading, orderError, orderStatuses, setOrderStatuses, updatingOrderId, handleOrderStatusChange } = useOutletContext();
 
   return (
-    <section className="admin-section admin-orders-section" id="orders" aria-labelledby="orders-heading">
+    <section className="admin-route-view admin-section admin-orders-section" id="orders" aria-labelledby="orders-heading">
       <div className="inventory-heading">
         <div><span className="admin-eyebrow">FULFILLMENT</span><h1 id="orders-heading">Orders <span className="inventory-count">{orders.length}</span></h1></div>
       </div>
@@ -27,11 +28,18 @@ const AdminOrders = () => {
                     <td>{order.orderItems.map((item, index) => <span className="admin-order-item" key={`${item.product}-${index}`}>{item.qty}× {item.name} ({item.size})</span>)}</td>
                     <td><strong>{formatCurrency(order.totalPrice)}</strong><span className="admin-order-date">{order.paymentMethod} · {order.isPaid ? 'Paid' : 'Unpaid'}</span></td>
                     <td>
-                      <select className="admin-order-status-select" aria-label={`Status for order ${order._id.slice(-6)}`} value={selectedStatus} onChange={event => setOrderStatuses(current => ({ ...current, [order._id]: event.target.value }))} disabled={order.orderStatus === 'Cancelled'}>
-                        {order.orderStatus === 'Payment Pending' && <option value="Payment Pending">Payment Pending</option>}
-                        {['Processing', 'Shipped', 'Delivered'].map(status => <option key={status} value={status}>{status}</option>)}
-                        {order.paymentMethod === 'COD' && <option value="Cancelled">Cancelled</option>}
-                      </select>
+                      <AdminSelect
+                        triggerClassName="admin-order-status-select"
+                        ariaLabel={`Status for order ${order._id.slice(-6)}`}
+                        value={selectedStatus}
+                        disabled={order.orderStatus === 'Cancelled'}
+                        options={[
+                          ...(order.orderStatus === 'Payment Pending' ? [{ value: 'Payment Pending', label: 'Payment Pending' }] : []),
+                          ...['Processing', 'Shipped', 'Delivered'].map(status => ({ value: status, label: status })),
+                          ...(order.paymentMethod === 'COD' ? [{ value: 'Cancelled', label: 'Cancelled' }] : []),
+                        ]}
+                        onChange={value => setOrderStatuses(current => ({ ...current, [order._id]: value }))}
+                      />
                     </td>
                     <td><button type="button" className="btn-edit" disabled={selectedStatus === order.orderStatus || updatingOrderId === order._id} onClick={() => handleOrderStatusChange(order._id)}>{updatingOrderId === order._id ? 'Saving...' : 'Save'}</button></td>
                   </tr>

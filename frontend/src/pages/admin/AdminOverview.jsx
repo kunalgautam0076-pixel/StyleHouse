@@ -6,7 +6,7 @@ const AdminOverview = () => {
   const { user, categories, products, publishedCount, draftCount, lowStockCount } = useOutletContext();
 
   return (
-    <section className="admin-overview-section" id="overview">
+    <section className="admin-route-view admin-overview-section" id="overview">
       <div className="admin-page-heading">
         <div>
           <span className="admin-eyebrow">STORE MANAGEMENT</span>

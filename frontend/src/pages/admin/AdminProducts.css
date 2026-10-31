@@ -5,9 +5,11 @@
 .inventory-filters button:hover { color: var(--admin-ink); }
 .inventory-filters button.active { border-bottom-color: #4c805f; color: #376447; }
 .inventory-filters button span { color: #9ba29e; font-size: 0.63rem; }
-.admin-sort-select { position: relative; display: flex; align-items: center; gap: 5px; height: 32px; padding: 0 9px; border: 1px solid #e6e9e7; border-radius: 6px; background: #fff; color: #818a84; font-size: 0.68rem; white-space: nowrap; }
-.admin-sort-select select { max-width: 145px; padding-right: 14px; appearance: none; border: 0; outline: 0; background: transparent; color: var(--admin-ink); font: inherit; font-weight: 600; }
-.admin-sort-select svg { position: absolute; right: 7px; pointer-events: none; color: #737b76; }
+.admin-sort-select { display: flex; align-items: center; gap: 5px; height: 32px; padding: 0 7px 0 9px; border: 1px solid #e6e9e7; border-radius: 6px; background: #fff; color: #818a84; font-size: 0.68rem; white-space: nowrap; }
+.admin-sort-select > span { flex: 0 0 auto; }
+.admin-sort-select .admin-select { flex: 0 0 132px; }
+.admin-sort-trigger { width: 100%; min-height: 30px; padding: 0 1px 0 2px; border: 0; background: transparent; color: var(--admin-ink); font-family: var(--font-body); font-size: 0.68rem; font-weight: 600; }
+.admin-sort-select .admin-select-menu { width: max-content; min-width: 190px; }
 .product-cell { display: flex; align-items: center; gap: 10px; min-width: 205px; font-weight: 500; }
 .product-cell > span { display: flex; flex-direction: column; gap: 3px; max-width: 205px; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .product-cell strong { overflow: hidden; color: #2a302c; font-size: 0.75rem; font-weight: 600; text-overflow: ellipsis; }
@@ -57,7 +59,7 @@
   .inventory-filters button { padding: 0 7px; font-size: 0.65rem; }
   .admin-sort-select { flex: 0 0 auto; }
   .admin-sort-select > span { display: none; }
-  .admin-sort-select select { max-width: 112px; }
+  .admin-sort-select .admin-select { flex-basis: 112px; }
   .admin-pagination { align-items: flex-start; flex-direction: column; }
   .add-product-section { padding: 13px; }
   .add-product-grid { grid-template-columns: 1fr; }

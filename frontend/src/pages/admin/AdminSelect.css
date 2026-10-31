@@ -1,0 +1,59 @@
+.admin-select { position: relative; min-width: 0; }
+.admin-select-trigger {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-width: 0;
+  color: #38413b;
+  cursor: pointer;
+  text-align: left;
+  transition: border-color 140ms ease, background 140ms ease, box-shadow 140ms ease;
+}
+.admin-select-trigger:hover:not(:disabled) { border-color: #b7c9bc; background-color: #fcfdfc; }
+.admin-select-trigger:focus-visible { outline: 2px solid #8eae98; outline-offset: 2px; }
+.admin-select-trigger:disabled { opacity: 0.58; cursor: not-allowed; }
+.admin-select-trigger svg { flex: 0 0 auto; color: #737b76; transition: transform 140ms ease; }
+.admin-select-trigger svg.is-open { transform: rotate(180deg); }
+.admin-select-menu {
+  position: absolute;
+  z-index: 50;
+  top: calc(100% + 6px);
+  right: 0;
+  min-width: 100%;
+  max-height: min(280px, 50vh);
+  padding: 4px;
+  overflow-y: auto;
+  border: 1px solid #e1e7e2;
+  border-radius: 7px;
+  background: #fff;
+  box-shadow: 0 12px 30px rgba(27,39,30,0.14);
+  transform-origin: top right;
+}
+.admin-select-option {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  width: 100%;
+  min-height: 34px;
+  padding: 0 9px;
+  border-radius: 4px;
+  background: transparent;
+  color: #56605a;
+  font-family: var(--font-body);
+  font-size: 0.75rem;
+  text-align: left;
+  white-space: nowrap;
+  transition: background 120ms ease, color 120ms ease;
+}
+.admin-select-option:hover,
+.admin-select-option.is-active { background: #f2f6f2; color: #315d40; }
+.admin-select-option.is-selected { color: #356847; font-weight: 650; }
+.admin-select-option svg { flex: 0 0 auto; color: #4c805f; }
+
+@media (prefers-reduced-motion: reduce) {
+  .admin-select-trigger,
+  .admin-select-trigger svg,
+  .admin-select-option { transition: none; }
+}
