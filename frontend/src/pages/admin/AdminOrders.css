@@ -1,7 +1,10 @@
 .admin-orders-section { margin-top: 0; }
 .admin-order-date,
 .admin-order-item { display: block; margin-top: 3px; color: #7d8580; font-size: 0.66rem; line-height: 1.4; }
-.admin-order-item { max-width: 190px; }
+.admin-order-items { display: grid; gap: 7px; min-width: 190px; }
+.admin-order-item { display: flex; align-items: center; gap: 8px; max-width: 230px; }
+.admin-order-item img { width: 34px; height: 42px; flex: 0 0 auto; border-radius: 4px; background: #f0f2f1; object-fit: cover; }
+.admin-order-item > span { min-width: 0; }
 .admin-order-status-select { width: 100%; min-width: 118px; min-height: 32px; padding: 0 7px; border: 1px solid #e2e7e3; border-radius: 5px; background: #fff; color: #424a45; font-family: var(--font-body); font-size: 0.69rem; }
 .admin-order-status-select:focus-visible { outline: 2px solid #8eae98; outline-offset: 1px; }
 .btn-edit { min-height: 28px; padding: 0 9px; border: 1px solid #dce6de; border-radius: 5px; background: #f2f7f3; color: #3f6f50; font-size: 0.69rem; font-weight: 650; }

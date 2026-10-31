@@ -25,7 +25,16 @@ const AdminOrders = () => {
                     <td><strong>#{order._id.slice(-6).toUpperCase()}</strong><span className="admin-order-date">{new Date(order.createdAt).toLocaleDateString('en-IN')}</span></td>
                     <td><strong>{order.user?.name || 'Customer'}</strong><span className="admin-order-date">{order.user?.email || 'Account unavailable'}</span></td>
                     <td><strong>{order.shippingAddress.fullName}</strong><span className="admin-order-date">{order.shippingAddress.city}, {order.shippingAddress.postalCode}</span><span className="admin-order-date">{order.shippingAddress.phone}</span></td>
-                    <td>{order.orderItems.map((item, index) => <span className="admin-order-item" key={`${item.product}-${index}`}>{item.qty}× {item.name} ({item.size})</span>)}</td>
+                    <td>
+                      <div className="admin-order-items">
+                        {order.orderItems.map((item, index) => (
+                          <span className="admin-order-item" key={`${item.product}-${index}`}>
+                            <img src={item.image || 'https://placehold.co/72x90?text=Item'} alt="" />
+                            <span>{item.qty}× {item.name} ({item.size})</span>
+                          </span>
+                        ))}
+                      </div>
+                    </td>
                     <td><strong>{formatCurrency(order.totalPrice)}</strong><span className="admin-order-date">{order.paymentMethod} · {order.isPaid ? 'Paid' : 'Unpaid'}</span></td>
                     <td>
                       <AdminSelect
