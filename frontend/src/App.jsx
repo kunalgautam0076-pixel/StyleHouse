@@ -14,7 +14,10 @@ import Account from './pages/Account';
 import NotFound from './pages/NotFound';
 import Cart from './pages/Cart';
 import Checkout from './pages/Checkout';
-import AdminDashboard from './pages/admin/AdminDashboard';
+import AdminDashboardController from './pages/admin/AdminDashboardController';
+import AdminOverview from './pages/admin/AdminOverview';
+import AdminProducts from './pages/admin/AdminProducts';
+import AdminOrders from './pages/admin/AdminOrders';
 import EditProduct from './pages/admin/EditProduct';
 import Wishlist from './pages/Wishlist';
 
@@ -36,37 +39,62 @@ const ScrollToTop = () => {
   return null;
 };
 
+const AdminIndexRedirect = () => {
+  const { hash } = useLocation();
+  const legacySection = hash.slice(1);
+  const destination = legacySection === 'orders'
+    ? 'orders'
+    : legacySection === 'overview'
+      ? 'overview'
+      : 'products';
+
+  return <Navigate to={destination} replace />;
+};
+
+const AppContent = () => {
+  const { pathname } = useLocation();
+  const isAdminRoute = pathname.startsWith('/admin');
+
+  return (
+    <div className={`app-wrapper${isAdminRoute ? ' admin-app-wrapper' : ''}`}>
+      {!isAdminRoute && <Navbar />}
+
+      <main className="main-content">
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/shop" element={<Shop />} />
+          <Route path="/product/:slug" element={<ProductDetails />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
+          <Route path="/account" element={<Account />} />
+          <Route path="/cart" element={<Cart />} />
+          <Route path="/checkout" element={<Checkout />} />
+          <Route element={<AdminRoute />}>
+            <Route path="/admin" element={<AdminDashboardController />}>
+              <Route index element={<AdminIndexRedirect />} />
+              <Route path="overview" element={<AdminOverview />} />
+              <Route path="products" element={<AdminProducts />} />
+              <Route path="orders" element={<AdminOrders />} />
+              <Route path="product/:id/edit" element={<EditProduct />} />
+            </Route>
+          </Route>
+          <Route path="/wishlist" element={<Wishlist />} />
+
+          {/* 404 Catch-all */}
+          <Route path="*" element={<NotFound />} />
+        </Routes>
+      </main>
+
+      {!isAdminRoute && <Footer />}
+    </div>
+  );
+};
+
 function App() {
   return (
     <Router>
       <ScrollToTop />
-      {/* app-wrapper and main-content are styled in global.css to keep the footer at the bottom */}
-      <div className="app-wrapper">
-        <Navbar />
-        
-        <main className="main-content">
-          <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/shop" element={<Shop />} />
-            <Route path="/product/:slug" element={<ProductDetails />} />
-            <Route path="/login" element={<Login />} />
-            <Route path="/register" element={<Register />} />
-            <Route path="/account" element={<Account />} />
-            <Route path="/cart" element={<Cart />} />
-            <Route path="/checkout" element={<Checkout />} />
-            <Route element={<AdminRoute />}>
-              <Route path="/admin" element={<AdminDashboard />} />
-              <Route path="/admin/product/:id/edit" element={<EditProduct />} />
-            </Route>
-            <Route path="/wishlist" element={<Wishlist />} />
-            
-            {/* 404 Catch-all */}
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </main>
-        
-        <Footer />
-      </div>
+      <AppContent />
     </Router>
   );
 }
