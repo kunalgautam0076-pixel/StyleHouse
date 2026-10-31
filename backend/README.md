@@ -30,16 +30,18 @@ Create the web service from that Blueprint and enter the requested values in
 the Render dashboard:
 
 - `MONGO_URI`: the production MongoDB connection string.
-- `CLIENT_URL`: the exact HTTPS URL of the deployed Vercel frontend.
+- `CLIENT_URL`: the exact HTTPS origin of the deployed Netlify frontend
+  (for example, `https://stylehousecloth.netlify.app`). The API uses this for
+  credentialed CORS requests; use the current deploy-preview origin when
+  testing a preview deployment.
 - `RAZORPAY_KEY_ID` and `RAZORPAY_KEY_SECRET`: keep Test Mode keys until the
   deployed checkout has been verified; use Live Mode only when ready to accept
   real payments.
 
-Render generates `JWT_SECRET` and supplies `PORT`. For the Vercel frontend,
-select `frontend` as the project root and set `VITE_API_BASE_URL` to
-`https://<your-render-service>.onrender.com/api/v1`. Redeploy the frontend
-after setting the variable. Then set `CLIENT_URL` on Render to the final
-frontend URL and redeploy the API.
+Render generates `JWT_SECRET` and supplies `PORT`. The Netlify configuration
+sets `VITE_API_BASE_URL` to the Render API URL. If the API URL changes, update
+`netlify.toml` and redeploy the frontend. Set `CLIENT_URL` on Render to the
+frontend origin and redeploy the API.
 
 Keep all production credentials in the hosting providers' environment-variable
 settings. Never commit `.env` files or real payment secrets.
